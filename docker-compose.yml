@@ -8,6 +8,9 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    environment:
+      - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=chave_segura_producao
     volumes:
       # Monta as pastas para persistir os anexos em PDF
       - ./backend/uploads:/app/uploads
