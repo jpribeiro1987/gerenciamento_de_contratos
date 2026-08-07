@@ -14,7 +14,7 @@ const Login = ({ onLoginSuccess, theme, setTheme }) => {
     setError('');
 
     try {
-      const res = await axios.post('http://localhost:3000/api/auth/login', { email, senha });
+      const res = await axios.post('/api/auth/login', { email, senha });
       const { token, user } = res.data;
       
       // Save to localStorage

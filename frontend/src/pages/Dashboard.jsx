@@ -68,8 +68,8 @@ const Dashboard = ({ userRole, userSector }) => {
     const fetchContracts = async () => {
       try {
         const url = userRole === 'ADMIN' 
-          ? 'http://localhost:3000/api/contratos' 
-          : `http://localhost:3000/api/contratos?setorId=${userSector}`;
+          ? '/api/contratos' 
+          : `/api/contratos?setorId=${userSector}`;
         
         const res = await axios.get(url);
         const data = res.data;

@@ -19,7 +19,7 @@ const Relatorios = ({ userRole, userSector }) => {
 
   const fetchSetores = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/setores');
+      const res = await axios.get('/api/setores');
       setSetores(res.data);
     } catch (err) {
       console.error(err);
@@ -28,7 +28,7 @@ const Relatorios = ({ userRole, userSector }) => {
 
   const fetchContratos = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/contratos');
+      const res = await axios.get('/api/contratos');
       setContratos(res.data);
     } catch (err) {
       console.error(err);

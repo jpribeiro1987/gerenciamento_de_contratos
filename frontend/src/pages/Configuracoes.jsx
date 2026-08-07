@@ -29,7 +29,7 @@ const Configuracoes = () => {
 
   const fetchConfig = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/config');
+      const res = await axios.get('/api/config');
       setConfig({
         EMAIL_TEMPLATE_SUBJECT: res.data.EMAIL_TEMPLATE_SUBJECT || 'Alerta de Vencimento: Contrato {{empresa}}',
         EMAIL_TEMPLATE_BODY: res.data.EMAIL_TEMPLATE_BODY || '<p>O contrato com a empresa <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p><p>Por favor, providencie a renovação.</p>',
@@ -42,7 +42,7 @@ const Configuracoes = () => {
 
   const fetchSmtpConfig = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/config/smtp');
+      const res = await axios.get('/api/config/smtp');
       setSmtpConfig(res.data);
     } catch (err) {
       console.error(err);
@@ -63,7 +63,7 @@ const Configuracoes = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put('http://localhost:3000/api/config', config);
+      await axios.put('/api/config', config);
       alert('Template salvo com sucesso!');
     } catch (err) {
       console.error(err);
@@ -77,7 +77,7 @@ const Configuracoes = () => {
     e.preventDefault();
     setLoadingSmtp(true);
     try {
-      const res = await axios.post('http://localhost:3000/api/config/smtp', smtpConfig);
+      const res = await axios.post('/api/config/smtp', smtpConfig);
       alert(res.data.message || 'Configurações SMTP salvas!');
     } catch (err) {
       console.error(err);
@@ -92,7 +92,7 @@ const Configuracoes = () => {
     if (!testEmail) return alert('Digite um e-mail para teste');
     setLoadingTest(true);
     try {
-      const res = await axios.post('http://localhost:3000/api/config/smtp/test', { email: testEmail });
+      const res = await axios.post('/api/config/smtp/test', { email: testEmail });
       alert(res.data.message || 'E-mail de teste enviado!');
     } catch (err) {
       console.error(err);

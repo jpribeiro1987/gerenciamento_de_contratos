@@ -11,7 +11,7 @@ const ModalObservacao = ({ contrato, onClose, onSave }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await axios.put(`http://localhost:3000/api/contratos/${contrato.id}`, { observacao });
+      await axios.put(`/api/contratos/${contrato.id}`, { observacao });
       onSave(contrato.id, observacao);
       onClose();
     } catch (err) {

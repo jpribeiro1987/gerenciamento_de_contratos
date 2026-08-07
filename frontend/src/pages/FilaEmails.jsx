@@ -13,7 +13,7 @@ const FilaEmails = ({ userRole }) => {
   const fetchAlertas = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/api/alertas');
+      const res = await axios.get('/api/alertas');
       setAlertas(res.data);
     } catch (err) {
       console.error(err);
@@ -25,7 +25,7 @@ const FilaEmails = ({ userRole }) => {
   const handleClearAlertas = async () => {
     if (window.confirm('Tem certeza que deseja limpar todo o histórico de e-mails? Esta ação não pode ser desfeita.')) {
       try {
-        await axios.delete('http://localhost:3000/api/alertas');
+        await axios.delete('/api/alertas');
         setAlertas([]);
         alert('Fila limpa com sucesso!');
       } catch (err) {

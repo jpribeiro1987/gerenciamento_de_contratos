@@ -16,8 +16,8 @@ const Contratos = ({ userRole, userSector }) => {
   const fetchContracts = async () => {
     try {
       const url = userRole === 'ADMIN' 
-        ? 'http://localhost:3000/api/contratos' 
-        : `http://localhost:3000/api/contratos?setorId=${userSector}`;
+        ? '/api/contratos' 
+        : `/api/contratos?setorId=${userSector}`;
       
       const res = await axios.get(url);
       setContracts(res.data);
@@ -55,7 +55,7 @@ const Contratos = ({ userRole, userSector }) => {
   const handleDelete = async (id, empresa) => {
     if (window.confirm(`Tem certeza que deseja excluir o contrato da empresa ${empresa}?`)) {
       try {
-        await axios.delete(`http://localhost:3000/api/contratos/${id}`);
+        await axios.delete(`/api/contratos/${id}`);
         setContracts(contracts.filter(c => c.id !== id));
       } catch (err) {
         console.error(err);
@@ -67,7 +67,7 @@ const Contratos = ({ userRole, userSector }) => {
   const handleSendAlert = async (id, empresa) => {
     if (window.confirm(`Deseja enviar um e-mail de alerta manual para o contrato da empresa ${empresa}?`)) {
       try {
-        await axios.post(`http://localhost:3000/api/contratos/${id}/alert-manual`);
+        await axios.post(`/api/contratos/${id}/alert-manual`);
         alert('E-mail enviado com sucesso!');
       } catch (err) {
         console.error(err);
@@ -128,7 +128,7 @@ const Contratos = ({ userRole, userSector }) => {
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     {c.anexos && (
                       <a 
-                        href={`http://localhost:3000/api/contratos/${c.id}/anexo`}
+                        href={`/api/contratos/${c.id}/anexo`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ ...iconBtnStyle, color: 'var(--primary)', textDecoration: 'none' }}

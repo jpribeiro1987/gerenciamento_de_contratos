@@ -18,7 +18,7 @@ const NovoContrato = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:3000/api/setores').then(res => setSetores(res.data));
+    axios.get('/api/setores').then(res => setSetores(res.data));
   }, []);
 
   const handleChange = (e) => {
@@ -45,7 +45,7 @@ const NovoContrato = () => {
         }
       });
       
-      await axios.post('http://localhost:3000/api/contratos', payload, {
+      await axios.post('/api/contratos', payload, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setSuccess(true);

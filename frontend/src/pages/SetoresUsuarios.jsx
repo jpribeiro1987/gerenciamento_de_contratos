@@ -24,14 +24,14 @@ const SetoresUsuarios = () => {
 
   const fetchSetores = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/setores');
+      const res = await axios.get('/api/setores');
       setSetores(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchUsuarios = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/usuarios');
+      const res = await axios.get('/api/usuarios');
       setUsuarios(res.data);
     } catch (err) { console.error(err); }
   };
@@ -41,7 +41,7 @@ const SetoresUsuarios = () => {
     e.preventDefault();
     if (!newSetorNome) return;
     try {
-      await axios.post('http://localhost:3000/api/setores', { nome: newSetorNome });
+      await axios.post('/api/setores', { nome: newSetorNome });
       setNewSetorNome('');
       fetchSetores();
     } catch (err) { alert('Erro ao criar setor'); }
@@ -50,7 +50,7 @@ const SetoresUsuarios = () => {
   const handleDeleteSetor = async (id) => {
     if (window.confirm('Excluir setor?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/setores/${id}`);
+        await axios.delete(`/api/setores/${id}`);
         fetchSetores();
       } catch (err) { alert('Erro ao excluir. O setor pode ter contratos vinculados.'); }
     }
@@ -73,9 +73,9 @@ const SetoresUsuarios = () => {
     e.preventDefault();
     try {
       if (editingUser) {
-        await axios.put(`http://localhost:3000/api/usuarios/${editingUser.id}`, userFormData);
+        await axios.put(`/api/usuarios/${editingUser.id}`, userFormData);
       } else {
-        await axios.post('http://localhost:3000/api/usuarios', userFormData);
+        await axios.post('/api/usuarios', userFormData);
       }
       setShowUserForm(false);
       setEditingUser(null);
@@ -99,7 +99,7 @@ const SetoresUsuarios = () => {
   const handleDeleteUser = async (id) => {
     if (window.confirm('Excluir usuário?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/usuarios/${id}`);
+        await axios.delete(`/api/usuarios/${id}`);
         fetchUsuarios();
       } catch (err) { alert('Erro ao excluir usuário.'); }
     }

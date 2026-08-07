@@ -11,7 +11,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
   const [loadingAditivo, setLoadingAditivo] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:3000/api/setores').then(res => setSetores(res.data));
+    axios.get('/api/setores').then(res => setSetores(res.data));
     
     if (!contrato) return;
 
@@ -38,7 +38,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
   const fetchAditivos = async () => {
     if (!contrato) return;
     try {
-      const res = await axios.get(`http://localhost:3000/api/contratos/${contrato.id}/aditivos`);
+      const res = await axios.get(`/api/contratos/${contrato.id}/aditivos`);
       setAditivos(res.data);
     } catch (err) {
       console.error(err);
@@ -70,7 +70,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
         }
       });
       
-      const res = await axios.put(`http://localhost:3000/api/contratos/${contrato.id}`, payload, {
+      const res = await axios.put(`/api/contratos/${contrato.id}`, payload, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       onSave(res.data);
@@ -148,7 +148,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
               {contrato.anexos && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
                   <a 
-                    href={`http://localhost:3000/api/contratos/${contrato.id}/anexo`} 
+                    href={`/api/contratos/${contrato.id}/anexo`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none' }}
@@ -160,7 +160,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                     onClick={async () => {
                       if (!window.confirm('Tem certeza que deseja excluir o PDF atual?')) return;
                       try {
-                        await axios.delete(`http://localhost:3000/api/contratos/${contrato.id}/anexo`);
+                        await axios.delete(`/api/contratos/${contrato.id}/anexo`);
                         alert('PDF excluído com sucesso.');
                         onSave(); // trigger refresh
                       } catch (err) {
@@ -210,7 +210,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                 {a.anexos && (
                   <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <a 
-                      href={`http://localhost:3000/api/contratos/aditivos/${a.id}/anexo`}
+                      href={`/api/contratos/aditivos/${a.id}/anexo`}
                       target="_blank" 
                       rel="noopener noreferrer"
                       style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', background: 'rgba(59, 130, 246, 0.1)', padding: '4px 8px', borderRadius: '4px' }}
@@ -222,7 +222,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                       onClick={async () => {
                         if (!window.confirm('Excluir PDF deste aditivo?')) return;
                         try {
-                          await axios.delete(`http://localhost:3000/api/contratos/aditivos/${a.id}/anexo`);
+                          await axios.delete(`/api/contratos/aditivos/${a.id}/anexo`);
                           fetchAditivos();
                         } catch (err) {
                           alert('Erro ao excluir PDF do aditivo.');
@@ -300,7 +300,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                     if (novoAditivo.novo_valor) payload.append('novo_valor', novoAditivo.novo_valor);
                     if (novoAditivo.pdf) payload.append('pdf', novoAditivo.pdf);
 
-                    await axios.post(`http://localhost:3000/api/contratos/${contrato.id}/aditivos`, payload, {
+                    await axios.post(`/api/contratos/${contrato.id}/aditivos`, payload, {
                       headers: { 'Content-Type': 'multipart/form-data' }
                     });
                     

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: contratos-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Monta as pastas para persistir os anexos em PDF
+      - ./backend/uploads:/app/uploads
+      # Monta a pasta do banco de dados (SQLite)
+      - ./backend/prisma:/app/prisma
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: contratos-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
