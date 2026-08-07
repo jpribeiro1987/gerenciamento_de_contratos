@@ -31,7 +31,15 @@ function excelDateToJSDate(serial) {
 }
 
 async function main() {
-  console.log('Starting Real DB Seed...');
+  console.log('Verificando estado do banco de dados...');
+  const adminExists = await prisma.usuario.findFirst({ where: { email: 'admin@hospital.com' } });
+  
+  if (adminExists) {
+    console.log('O banco de dados já possui dados. Poupando o Seed para não apagar os cadastros.');
+    return;
+  }
+
+  console.log('Iniciando o Seed para criar o ambiente base...');
   
   // Limpar tabelas para re-seed seguro
   await prisma.historicoAlerta.deleteMany();
@@ -42,7 +50,18 @@ async function main() {
   const excelPath = 'C:\\Users\\T-GAMER\\Downloads\\CONTROLE DE CONTRATOS - 2026.xlsx';
   
   if (!fs.existsSync(excelPath)) {
-    throw new Error(`Planilha não encontrada no caminho: ${excelPath}`);
+    console.log('Planilha não encontrada no caminho do Windows. Inicializando apenas com o usuário Administrador.');
+    const createdSetor = await prisma.setor.create({ data: { nome: 'Administração' } });
+    await prisma.usuario.create({
+      data: {
+        nome: 'Administrador do Sistema',
+        email: 'admin@hospital.com',
+        perfil: 'ADMIN',
+        setores: { connect: [{ id: createdSetor.id }] }
+      }
+    });
+    console.log('Ambiente base criado com sucesso!');
+    return;
   }
 
   const workbook = xlsx.readFile(excelPath);
