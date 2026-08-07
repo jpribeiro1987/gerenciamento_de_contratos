@@ -21,4 +21,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # Script de entrada para garantir que o banco está sincronizado antes de iniciar
-CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && node src/app.js"]
+CMD ["sh", "-c", "npx prisma db push && node seed.js && node src/app.js"]
