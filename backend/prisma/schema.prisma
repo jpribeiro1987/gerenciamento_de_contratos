@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Setor {
+  id        Int        @id @default(autoincrement())
+  nome      String     @unique
+  contratos Contrato[]
+  usuarios  Usuario[]  @relation("UsuarioSetor")
+}
+
+model Usuario {
+  id      Int      @id @default(autoincrement())
+  nome    String
+  email   String   @unique
+  senha   String   @default("$2b$10$HRQ8qYxTuNqFuHOi1DFKUe6VxXzS/gWXKs4wMRDu/s9wYn0sbYpN2") // mudar123
+  perfil  String   @default("GESTOR") // ADMIN, GESTOR, LEITURA
+  setores Setor[]  @relation("UsuarioSetor")
+}
+
+model Contrato {
+  id                   Int               @id @default(autoincrement())
+  empresa              String
+  setorId              Int
+  setor                Setor             @relation(fields: [setorId], references: [id])
+  prazo_rescisao_dias  Int?              
+  valor                Float?
+  valor_tipo           String?           // FIXO, VARIAVEL
+  valor_observacao     String?           // "R$ x/turno"
+  data_contratacao     DateTime?
+  data_vigencia_fim    DateTime?
+  renovacao_automatica Boolean           @default(false)
+  dias_alerta          Int               @default(30)
+  status               String            @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, RENOVADO, ENCERRADO
+  observacao           String?
+  anexos               String?           
+  criado_por           String?
+  atualizado_em        DateTime          @updatedAt
+  criado_em            DateTime          @default(now())
+  HistoricoAlerta      HistoricoAlerta[]
+  aditivos             Aditivo[]
+}
+
+model Aditivo {
+  id                 Int      @id @default(autoincrement())
+  contratoId         Int
+  contrato           Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  descricao          String?
+  nova_data_vigencia DateTime
+  novo_valor         Float?
+  anexos             String?
+  criado_em          DateTime @default(now())
+}
+
+model HistoricoAlerta {
+  id           Int      @id @default(autoincrement())
+  contratoId   Int
+  contrato     Contrato @relation(fields: [contratoId], references: [id])
+  data_envio   DateTime @default(now())
+  destinatarios String
+  status_envio String
+  erro         String?
+}
+
+model Configuracao {
+  id    Int    @id @default(autoincrement())
+  chave String @unique
+  valor String
+}
