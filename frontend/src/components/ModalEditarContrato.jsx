@@ -200,11 +200,11 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div style={{ fontWeight: 600 }}>{a.descricao || 'Sem descrição'}</div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Registrado em: {new Date(a.criado_em).toLocaleDateString('pt-BR')}
+                    Registrado em: {new Date(a.criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  <div>Nova Vigência: <span style={{ color: 'var(--text-main)' }}>{new Date(a.nova_data_vigencia).toLocaleDateString('pt-BR')}</span></div>
+                  <div>Nova Vigência: <span style={{ color: 'var(--text-main)' }}>{new Date(a.nova_data_vigencia).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span></div>
                   <div>Novo Valor: <span style={{ color: 'var(--text-main)' }}>{a.novo_valor ? `R$ ${a.novo_valor}` : '-'}</span></div>
                 </div>
                 {a.anexos && (

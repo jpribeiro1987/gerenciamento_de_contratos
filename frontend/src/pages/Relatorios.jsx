@@ -204,7 +204,7 @@ const Relatorios = ({ userRole, userSector }) => {
                     <td style={{ fontWeight: 500 }}>{c.empresa}</td>
                     <td>{c.setor?.nome}</td>
                     <td>{c.valor ? `R$ ${c.valor}` : '-'}</td>
-                    <td>{c.data_vigencia_fim ? new Date(c.data_vigencia_fim).toLocaleDateString('pt-BR') : 'Indeterminado'}</td>
+                    <td>{c.data_vigencia_fim ? new Date(c.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
                     <td>
                       <span className={`badge ${getStatusBadgeClass(c.status)}`}>
                         {c.status}
