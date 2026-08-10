@@ -89,6 +89,13 @@ router.post('/restore', upload.single('backup'), async (req, res) => {
 
     // 1. Substituir o banco de dados
     const dbTarget = path.join(__dirname, '../../prisma/dev.db');
+    
+    // Deletar os arquivos temporários do SQLite (WAL e SHM) para evitar corrupção
+    const dbWal = path.join(__dirname, '../../prisma/dev.db-wal');
+    const dbShm = path.join(__dirname, '../../prisma/dev.db-shm');
+    if (fs.existsSync(dbWal)) fs.unlinkSync(dbWal);
+    if (fs.existsSync(dbShm)) fs.unlinkSync(dbShm);
+
     fs.copyFileSync(dbSource, dbTarget);
 
     // 2. Substituir a pasta de uploads
