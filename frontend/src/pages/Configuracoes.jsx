@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, Mail, Server, Clock, Download } from 'lucide-react';
+import { Save, Mail, Server, Clock, Download, Upload } from 'lucide-react';
 
 const Configuracoes = () => {
   const [config, setConfig] = useState({
@@ -21,6 +21,8 @@ const Configuracoes = () => {
   const [loading, setLoading] = useState(false);
   const [loadingSmtp, setLoadingSmtp] = useState(false);
   const [loadingTest, setLoadingTest] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     fetchConfig();
@@ -129,6 +131,35 @@ const Configuracoes = () => {
     } catch (err) {
       alert('Erro ao tentar baixar o backup.');
       console.error(err);
+    }
+  };
+
+  const handleRestoreClick = () => {
+    if (window.confirm('ATENÇÃO: Restaurar um backup irá apagar TODOS os dados e PDFs atuais do sistema e substituí-los pelo conteúdo do arquivo ZIP. Deseja continuar?')) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setRestoring(true);
+    const formData = new FormData();
+    formData.append('backup', file);
+
+    try {
+      const res = await axios.post('/api/backup/restore', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      alert(res.data.message || 'Backup restaurado com sucesso!');
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Erro ao restaurar o backup.');
+    } finally {
+      setRestoring(false);
+      e.target.value = '';
     }
   };
 
@@ -360,17 +391,40 @@ const Configuracoes = () => {
           </p>
         </div>
 
-        <button 
-          type="button"
-          onClick={handleBackup}
-          style={{ 
-            background: 'var(--primary)', color: 'white', padding: '12px 24px', 
-            border: 'none', borderRadius: '6px', fontWeight: 600,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
-          }}
-        >
-          <Download size={20}/> Baixar Backup Completo
-        </button>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <button 
+            type="button"
+            onClick={handleBackup}
+            style={{ 
+              background: 'var(--primary)', color: 'white', padding: '12px 24px', 
+              border: 'none', borderRadius: '6px', fontWeight: 600,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+            }}
+          >
+            <Download size={20}/> Baixar Backup Completo
+          </button>
+          
+          <button 
+            type="button"
+            onClick={handleRestoreClick}
+            disabled={restoring}
+            style={{ 
+              background: '#ef4444', color: 'white', padding: '12px 24px', 
+              border: 'none', borderRadius: '6px', fontWeight: 600,
+              cursor: restoring ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+              opacity: restoring ? 0.7 : 1
+            }}
+          >
+            <Upload size={20}/> {restoring ? 'Restaurando...' : 'Restaurar Backup'}
+          </button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            accept=".zip" 
+            style={{ display: 'none' }} 
+          />
+        </div>
       </div>
     </div>
   );

@@ -21,7 +21,11 @@ router.get('/', (req, res) => {
 
     // Se houver erro no processo de compressão, encerra a resposta
     archive.on('error', (err) => {
-      res.status(500).send({ error: err.message });
+      console.error('Erro na compressão:', err);
+      // Se headers já foram enviados, não dá pra mandar status(500) json
+      if (!res.headersSent) {
+        res.status(500).json({ error: err.message });
+      }
     });
 
     // Enviar o zip diretamente como resposta (stream)
@@ -39,12 +43,76 @@ router.get('/', (req, res) => {
       archive.directory(uploadsPath, 'uploads');
     }
 
-    // Finalizar o pacote (isso fechará o stream de resposta e fará o download terminar)
+    // Finalizar o pacote
     archive.finalize();
 
   } catch (error) {
     console.error('Erro ao gerar backup:', error);
-    res.status(500).json({ error: 'Erro ao gerar backup' });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Erro ao gerar backup', details: error.message, stack: error.stack });
+    }
+  }
+});
+
+const multer = require('multer');
+const AdmZip = require('adm-zip');
+
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB
+});
+
+router.post('/restore', upload.single('backup'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhum arquivo de backup enviado.' });
+    }
+
+    const zip = new AdmZip(req.file.buffer);
+    const tempDir = path.join(__dirname, '../../temp_restore');
+    
+    // Limpar diretório temporário se existir
+    if (fs.existsSync(tempDir)) {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(tempDir, { recursive: true });
+
+    // Extrair tudo para o tempDir
+    zip.extractAllTo(tempDir, true);
+
+    const dbSource = path.join(tempDir, 'dev.db');
+    const uploadsSource = path.join(tempDir, 'uploads');
+    
+    if (!fs.existsSync(dbSource)) {
+      return res.status(400).json({ error: 'Arquivo dev.db não encontrado no backup.' });
+    }
+
+    // 1. Substituir o banco de dados
+    const dbTarget = path.join(__dirname, '../../prisma/dev.db');
+    fs.copyFileSync(dbSource, dbTarget);
+
+    // 2. Substituir a pasta de uploads
+    const uploadsTarget = path.join(__dirname, '../../uploads');
+    if (fs.existsSync(uploadsSource)) {
+      if (!fs.existsSync(uploadsTarget)) {
+        fs.mkdirSync(uploadsTarget, { recursive: true });
+      }
+      
+      const files = fs.readdirSync(uploadsSource);
+      for (const file of files) {
+        fs.copyFileSync(path.join(uploadsSource, file), path.join(uploadsTarget, file));
+      }
+    }
+
+    // Limpar tempDir
+    fs.rmSync(tempDir, { recursive: true, force: true });
+
+    // Enviar sucesso
+    res.json({ message: 'Backup restaurado com sucesso. Reinicie o servidor se necessário.' });
+
+  } catch (error) {
+    console.error('Erro na restauração:', error);
+    res.status(500).json({ error: 'Erro ao restaurar backup', details: error.message });
   }
 });
 
