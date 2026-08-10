@@ -33,7 +33,10 @@ router.post('/smtp', (req, res) => {
 
   // Atualizar arquivo `.env` físico
   try {
-    let envFile = fs.readFileSync(envPath, 'utf-8');
+    let envFile = '';
+    if (fs.existsSync(envPath)) {
+      envFile = fs.readFileSync(envPath, 'utf-8');
+    }
     
     const updateEnvVar = (key, value) => {
       const regex = new RegExp(`^${key}=.*$`, 'm');
