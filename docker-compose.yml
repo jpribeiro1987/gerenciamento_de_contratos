@@ -11,6 +11,7 @@ services:
     environment:
       - DATABASE_URL=file:./dev.db
       - JWT_SECRET=chave_segura_producao
+      - TZ=America/Sao_Paulo
     volumes:
       # Monta as pastas para persistir os anexos em PDF
       - ./backend/uploads:/app/uploads
