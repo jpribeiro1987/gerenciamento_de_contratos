@@ -63,7 +63,7 @@ model Aditivo {
 model HistoricoAlerta {
   id           Int      @id @default(autoincrement())
   contratoId   Int
-  contrato     Contrato @relation(fields: [contratoId], references: [id])
+  contrato     Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
   data_envio   DateTime @default(now())
   destinatarios String
   status_envio String
