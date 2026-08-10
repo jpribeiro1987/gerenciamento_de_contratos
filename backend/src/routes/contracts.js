@@ -207,11 +207,24 @@ router.post('/:id/alert-manual', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.contrato.delete({
-      where: { id: parseInt(id) }
+    const parsedId = parseInt(id);
+
+    // Apagar manualmente os registros dependentes para evitar erro de Foreign Key do SQLite
+    await prisma.historicoAlerta.deleteMany({
+      where: { contratoId: parsedId }
     });
+    
+    await prisma.aditivo.deleteMany({
+      where: { contratoId: parsedId }
+    });
+
+    await prisma.contrato.delete({
+      where: { id: parsedId }
+    });
+    
     res.status(204).send();
   } catch (error) {
+    console.error("Erro ao excluir contrato:", error);
     res.status(500).json({ error: 'Erro ao excluir contrato' });
   }
 });
