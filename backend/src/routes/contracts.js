@@ -26,7 +26,34 @@ router.get('/', async (req, res) => {
       },
       orderBy: { data_vigencia_fim: 'asc' }
     });
-    res.json(contracts);
+
+    // Calcular o status dinamicamente baseado na data de hoje
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const updatedContracts = contracts.map(contract => {
+      if (contract.status === 'ENCERRADO' || contract.status === 'RENOVADO') {
+        return contract;
+      }
+      
+      if (!contract.data_vigencia_fim) {
+        return contract;
+      }
+
+      const diffTime = new Date(contract.data_vigencia_fim).getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      let calcStatus = 'VIGENTE';
+      if (diffDays < 0) {
+        calcStatus = 'VENCIDO';
+      } else if (diffDays <= contract.dias_alerta) {
+        calcStatus = 'A_VENCER';
+      }
+
+      return { ...contract, status: calcStatus };
+    });
+
+    res.json(updatedContracts);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar contratos' });
   }
