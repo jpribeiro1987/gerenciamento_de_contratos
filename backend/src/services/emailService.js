@@ -13,14 +13,10 @@ const sendEmail = async (to, subject, html) => {
 
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = smtp;
 
-  // Se o SMTP_HOST estiver vazio, apenas loga no console (modo de testes)
+  // Se o SMTP_HOST estiver vazio, falhar o envio para não registrar falso positivo
   if (!SMTP_HOST) {
-    console.log(`\n--- [TESTE] ENVIANDO E-MAIL (SMTP não configurado) ---`);
-    console.log(`Para: ${to}`);
-    console.log(`Assunto: ${subject}`);
-    console.log(`Conteúdo: ${html.replace(/<[^>]*>?/gm, '')}`); 
-    console.log(`----------------------------------------------------\n`);
-    return { success: true, error: null };
+    console.log(`\n--- [TESTE] Tentativa de envio de E-MAIL abortada (SMTP não configurado) ---`);
+    return { success: false, error: 'Configurações SMTP ausentes no banco de dados' };
   }
 
   try {

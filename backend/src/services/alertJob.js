@@ -25,11 +25,8 @@ async function scheduleAlertJob(timeString = "06:00") {
   });
 }
 
-// Run on startup for demo purposes
-setTimeout(() => {
-  console.log('Running initial contract alert check...');
-  checkContractsAndAlert();
-}, 2000);
+// Removido o disparo automático no momento em que o servidor liga. 
+// O robô agora só roda estritamente no horário agendado.
 
 async function checkContractsAndAlert() {
   try {
