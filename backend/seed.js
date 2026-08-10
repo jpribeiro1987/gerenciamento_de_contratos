@@ -32,21 +32,15 @@ function excelDateToJSDate(serial) {
 
 async function main() {
   console.log('Verificando estado do banco de dados...');
-  const adminExists = await prisma.usuario.findFirst({ where: { email: 'admin@hospital.com' } });
+  const anyUserExists = await prisma.usuario.findFirst();
   
-  if (adminExists) {
+  if (anyUserExists) {
     console.log('O banco de dados já possui dados. Poupando o Seed para não apagar os cadastros.');
     return;
   }
 
   console.log('Iniciando o Seed para criar o ambiente base...');
   
-  // Limpar tabelas para re-seed seguro
-  await prisma.historicoAlerta.deleteMany();
-  await prisma.contrato.deleteMany();
-  await prisma.usuario.deleteMany();
-  await prisma.setor.deleteMany();
-
   const excelPath = 'C:\\Users\\T-GAMER\\Downloads\\CONTROLE DE CONTRATOS - 2026.xlsx';
   
   if (!fs.existsSync(excelPath)) {
