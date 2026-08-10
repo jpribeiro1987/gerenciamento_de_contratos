@@ -2,8 +2,8 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Instalar pacotes de sistema necessários (openssl para Prisma)
-RUN apk add --no-cache openssl
+# Instalar pacotes de sistema necessários (openssl para Prisma e tzdata para fuso horário)
+RUN apk add --no-cache openssl tzdata
 
 # Copiar apenas os arquivos de dependência primeiro (para usar cache do Docker)
 COPY package*.json ./

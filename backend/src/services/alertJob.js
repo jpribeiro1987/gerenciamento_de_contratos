@@ -20,6 +20,8 @@ async function scheduleAlertJob(timeString = "06:00") {
   currentCronTask = cron.schedule(cronExpression, async () => {
     console.log(`[AlertJob] Executando verificação diária... (${new Date().toLocaleString()})`);
     await checkContractsAndAlert();
+  }, {
+    timezone: "America/Sao_Paulo"
   });
 }
 
@@ -65,9 +67,12 @@ async function checkContractsAndAlert() {
           });
         }
 
-        // Check if we already sent an email recently to avoid spamming everyday
+        // Check if we already sent an automatic email recently to avoid spamming everyday
         const lastAlert = await prisma.historicoAlerta.findFirst({
-          where: { contratoId: contract.id },
+          where: { 
+            contratoId: contract.id,
+            status_envio: 'SUCESSO' // Ignorar SUCESSO_MANUAL para não bloquear o robô
+          },
           orderBy: { data_envio: 'desc' }
         });
 
@@ -75,6 +80,7 @@ async function checkContractsAndAlert() {
           (new Date().getTime() - lastAlert.data_envio.getTime()) > (7 * 24 * 60 * 60 * 1000); // 7 days interval
 
         if (shouldSend) {
+          console.log(`[AlertJob] Enviando alerta para o contrato ${contract.id} (${contract.empresa})`);
           const emails = contract.setor.usuarios.map(u => u.email);
           
           const uniqueEmails = [...new Set(emails)].join(',');
@@ -111,6 +117,8 @@ async function checkContractsAndAlert() {
               erro: error
             }
           });
+        } else {
+          console.log(`[AlertJob] Pulando contrato ${contract.id} (${contract.empresa}) - E-mail já enviado nos últimos 7 dias.`);
         }
       } else if (diffDays < 0 && contract.status !== 'VENCIDO') {
         // Contract is expired
