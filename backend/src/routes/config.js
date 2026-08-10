@@ -10,55 +10,45 @@ const prisma = new PrismaClient();
 const envPath = path.resolve(__dirname, '../../.env');
 
 // Get SMTP config
-router.get('/smtp', (req, res) => {
-  res.json({
-    SMTP_HOST: process.env.SMTP_HOST || '',
-    SMTP_PORT: process.env.SMTP_PORT || '587',
-    SMTP_USER: process.env.SMTP_USER || '',
-    SMTP_PASS: process.env.SMTP_PASS || '',
-    SMTP_FROM: process.env.SMTP_FROM || ''
-  });
+router.get('/smtp', async (req, res) => {
+  try {
+    const configs = await prisma.configuracao.findMany({
+      where: { chave: { in: ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM'] } }
+    });
+    const smtp = {};
+    configs.forEach(c => { smtp[c.chave] = c.valor; });
+
+    res.json({
+      SMTP_HOST: smtp.SMTP_HOST || '',
+      SMTP_PORT: smtp.SMTP_PORT || '587',
+      SMTP_USER: smtp.SMTP_USER || '',
+      SMTP_PASS: smtp.SMTP_PASS || '',
+      SMTP_FROM: smtp.SMTP_FROM || ''
+    });
+  } catch(error) {
+    res.status(500).json({ error: 'Erro ao buscar configurações SMTP do banco' });
+  }
 });
 
 // Save SMTP config
-router.post('/smtp', (req, res) => {
+router.post('/smtp', async (req, res) => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = req.body;
   
-  // Atualizar `process.env` em memória
-  process.env.SMTP_HOST = SMTP_HOST;
-  process.env.SMTP_PORT = SMTP_PORT;
-  process.env.SMTP_USER = SMTP_USER;
-  process.env.SMTP_PASS = SMTP_PASS;
-  process.env.SMTP_FROM = SMTP_FROM;
-
-  // Atualizar arquivo `.env` físico
   try {
-    let envFile = '';
-    if (fs.existsSync(envPath)) {
-      envFile = fs.readFileSync(envPath, 'utf-8');
-    }
-    
-    const updateEnvVar = (key, value) => {
-      const regex = new RegExp(`^${key}=.*$`, 'm');
-      const formattedValue = value.includes(' ') ? `"${value}"` : value;
-      if (regex.test(envFile)) {
-        envFile = envFile.replace(regex, `${key}=${formattedValue}`);
-      } else {
-        envFile += `\n${key}=${formattedValue}`;
+    const data = { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM };
+    for (const key of Object.keys(data)) {
+      if (data[key] !== undefined) {
+        await prisma.configuracao.upsert({
+          where: { chave: key },
+          update: { valor: data[key] },
+          create: { chave: key, valor: data[key] }
+        });
       }
-    };
-
-    updateEnvVar('SMTP_HOST', SMTP_HOST);
-    updateEnvVar('SMTP_PORT', SMTP_PORT);
-    updateEnvVar('SMTP_USER', SMTP_USER);
-    updateEnvVar('SMTP_PASS', SMTP_PASS);
-    updateEnvVar('SMTP_FROM', SMTP_FROM);
-
-    fs.writeFileSync(envPath, envFile, 'utf-8');
-    res.json({ success: true, message: 'Configurações salvas com sucesso' });
+    }
+    res.json({ success: true, message: 'Configurações SMTP salvas com sucesso' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Erro ao salvar configurações no arquivo .env' });
+    res.status(500).json({ error: 'Erro ao salvar configurações SMTP no banco' });
   }
 });
 

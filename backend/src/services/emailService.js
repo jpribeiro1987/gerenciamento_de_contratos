@@ -1,7 +1,17 @@
 const nodemailer = require('nodemailer');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 const sendEmail = async (to, subject, html) => {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env;
+  // Buscar configs SMTP no banco de dados (ignorando o .env)
+  const configs = await prisma.configuracao.findMany({
+    where: { chave: { in: ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM'] } }
+  });
+  
+  const smtp = {};
+  configs.forEach(c => { smtp[c.chave] = c.valor; });
+
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = smtp;
 
   // Se o SMTP_HOST estiver vazio, apenas loga no console (modo de testes)
   if (!SMTP_HOST) {
