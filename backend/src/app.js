@@ -14,6 +14,7 @@ app.use(express.json());
 const contractsRoutes = require('./routes/contracts');
 const sectorsRoutes = require('./routes/sectors');
 const configRoutes = require('./routes/config');
+const backupRoutes = require('./routes/backup');
 const usersRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
 const alertasRoutes = require('./routes/alertas');
@@ -23,6 +24,7 @@ app.use('/api/setores', sectorsRoutes);
 app.use('/api/contratos', contractsRoutes);
 app.use('/api/usuarios', usersRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/backup', backupRoutes);
 app.use('/api/alertas', alertasRoutes);
 
 // Simple healthcheck

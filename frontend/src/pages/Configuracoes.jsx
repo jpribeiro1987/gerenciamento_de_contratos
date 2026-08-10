@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, Mail, Server, Clock } from 'lucide-react';
+import { Save, Mail, Server, Clock, Download } from 'lucide-react';
 
 const Configuracoes = () => {
   const [config, setConfig] = useState({
@@ -99,6 +99,36 @@ const Configuracoes = () => {
       alert(err.response?.data?.error || 'Erro ao enviar e-mail de teste.');
     } finally {
       setLoadingTest(false);
+    }
+  };
+
+  const handleBackup = async () => {
+    try {
+      const response = await axios.get('/api/backup', {
+        responseType: 'blob' // Necessário para fazer o download de arquivos
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Tenta pegar o nome do arquivo enviado pelo servidor, caso contrário usa um padrão
+      const disposition = response.headers['content-disposition'];
+      let filename = 'backup_contratos.zip';
+      if (disposition && disposition.indexOf('attachment') !== -1) {
+        const matches = /filename="([^"]+)"/.exec(disposition);
+        if (matches != null && matches[1]) {
+          filename = matches[1];
+        }
+      }
+
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      alert('Erro ao tentar baixar o backup.');
+      console.error(err);
     }
   };
 
@@ -317,6 +347,30 @@ const Configuracoes = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="glass-card" style={{ marginTop: '0px' }}>
+        <h2 style={{ fontSize: '1.3rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Download size={20} color="var(--primary)" /> Backup do Sistema
+        </h2>
+        
+        <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '16px', borderRadius: '8px', marginBottom: '24px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+          <p style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>
+            Gere um arquivo compacto (<code>.zip</code>) com todos os dados do sistema, incluindo o banco de dados atual e os PDFs de contratos anexados.
+          </p>
+        </div>
+
+        <button 
+          type="button"
+          onClick={handleBackup}
+          style={{ 
+            background: 'var(--primary)', color: 'white', padding: '12px 24px', 
+            border: 'none', borderRadius: '6px', fontWeight: 600,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+          }}
+        >
+          <Download size={20}/> Baixar Backup Completo
+        </button>
       </div>
     </div>
   );
