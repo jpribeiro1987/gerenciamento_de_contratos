@@ -13,7 +13,7 @@ const Sidebar = ({ activeTab, setActiveTab, userRole, onLogout, theme, setTheme 
              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
         <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
           <Grid size={24} />
-          Contratos
+          Sistema de Gestão de Contratos e Instruções Técnicas de Trabalho (ITT)
         </div>
       </div>
       

@@ -59,7 +59,7 @@ const Login = ({ onLoginSuccess, theme, setTheme }) => {
         <div style={{ textAlign: 'center', width: '100%' }}>
           <img src="/logo.png" alt="Logo Instituição" style={{ maxWidth: '100%', maxHeight: '80px', objectFit: 'contain', marginBottom: '16px' }} 
                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--primary)' }}>Sistema de Gestão de Contratos</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--primary)' }}>Sistema de Gestão de Contratos e Instruções Técnicas de Trabalho (ITT)</h1>
           <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Faça login para acessar o sistema</p>
         </div>
 
