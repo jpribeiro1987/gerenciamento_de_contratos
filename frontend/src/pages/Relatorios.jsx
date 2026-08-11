@@ -4,9 +4,11 @@ import { Printer, Filter } from 'lucide-react';
 
 const Relatorios = ({ userRole, userSector }) => {
   const [contratos, setContratos] = useState([]);
+  const [itts, setItts] = useState([]);
   const [setores, setSetores] = useState([]);
   
   // Filtros
+  const [filtroTipo, setFiltroTipo] = useState('CONTRATOS'); // CONTRATOS, ITTS
   const [filtroSetor, setFiltroSetor] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroDataInicio, setFiltroDataInicio] = useState('');
@@ -15,6 +17,7 @@ const Relatorios = ({ userRole, userSector }) => {
   useEffect(() => {
     fetchSetores();
     fetchContratos();
+    fetchItts();
   }, []);
 
   const fetchSetores = async () => {
@@ -35,6 +38,15 @@ const Relatorios = ({ userRole, userSector }) => {
     }
   };
 
+  const fetchItts = async () => {
+    try {
+      const res = await axios.get('/api/itts');
+      setItts(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const getStatusBadgeClass = (status) => {
     if (status === 'VIGENTE') return 'badge-vigente';
     if (status === 'A_VENCER') return 'badge-a_vencer';
@@ -46,22 +58,24 @@ const Relatorios = ({ userRole, userSector }) => {
     window.print();
   };
 
-  // Filtragem local
-  const contratosFiltrados = contratos.filter((c) => {
+  // Filtragem local baseada no Tipo
+  const dataSource = filtroTipo === 'CONTRATOS' ? contratos : itts;
+
+  const dadosFiltrados = dataSource.filter((item) => {
     // Gestor can only see their sector
-    if (userRole === 'GESTOR' && userSector && c.setorId !== userSector) return false;
+    if (userRole === 'GESTOR' && userSector && item.setorId !== userSector) return false;
     
     // Explicit filter by sector
-    if (filtroSetor && c.setorId.toString() !== filtroSetor) return false;
+    if (filtroSetor && item.setorId.toString() !== filtroSetor) return false;
 
     // Filter by status
-    if (filtroStatus && c.status !== filtroStatus) return false;
+    if (filtroStatus && item.status !== filtroStatus) return false;
 
     // Filter by Date
     if (filtroDataInicio || filtroDataFim) {
-      if (!c.data_vigencia_fim) return false; // Se não tem data e filtramos por data, tira.
+      if (!item.data_vigencia_fim) return false; 
       
-      const dtVigencia = new Date(c.data_vigencia_fim);
+      const dtVigencia = new Date(item.data_vigencia_fim);
       
       if (filtroDataInicio) {
         const dtInicio = new Date(filtroDataInicio + 'T00:00:00');
@@ -84,7 +98,7 @@ const Relatorios = ({ userRole, userSector }) => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #ccc', paddingBottom: '16px', marginBottom: '16px' }}>
           <img src="/logo.png" alt="Logo" style={{ maxHeight: '60px' }} />
           <div style={{ textAlign: 'right' }}>
-            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>Relatório de Contratos</h2>
+            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>Relatório de {filtroTipo === 'CONTRATOS' ? 'Contratos' : 'Instruções Técnicas (ITT)'}</h2>
             <p style={{ margin: 0, color: '#666' }}>Emitido em: {new Date().toLocaleDateString('pt-BR')}</p>
           </div>
         </div>
@@ -110,6 +124,18 @@ const Relatorios = ({ userRole, userSector }) => {
         
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
           
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1 1 200px' }}>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Tipo de Relatório</label>
+            <select 
+              value={filtroTipo} 
+              onChange={(e) => setFiltroTipo(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="CONTRATOS">Contratos</option>
+              <option value="ITTS">Instruções Técnicas (ITT)</option>
+            </select>
+          </div>
+
           {userRole !== 'GESTOR' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1 1 200px' }}>
               <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Setor Responsável</label>
@@ -137,8 +163,8 @@ const Relatorios = ({ userRole, userSector }) => {
               <option value="VIGENTE">Vigente</option>
               <option value="A_VENCER">A Vencer</option>
               <option value="VENCIDO">Vencido</option>
-              <option value="RENOVADO">Renovado</option>
-              <option value="ENCERRADO">Encerrado</option>
+              <option value="RENOVADO">Renovado/Revisado</option>
+              <option value="ENCERRADO">Encerrado/Cancelado</option>
             </select>
           </div>
 
@@ -179,35 +205,35 @@ const Relatorios = ({ userRole, userSector }) => {
 
       <div className="glass-card">
         <h2 className="print-hide" style={{ fontSize: '1.2rem', marginBottom: '16px' }}>
-          Prévia dos Dados ({contratosFiltrados.length} encontrados)
+          Prévia dos Dados ({dadosFiltrados.length} encontrados)
         </h2>
         
-        {contratosFiltrados.length === 0 ? (
+        {dadosFiltrados.length === 0 ? (
           <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>
-            Nenhum contrato encontrado com os filtros selecionados.
+            Nenhum registro encontrado com os filtros selecionados.
           </p>
         ) : (
           <div className="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>Empresa</th>
+                  <th>{filtroTipo === 'CONTRATOS' ? 'Empresa' : 'Título'}</th>
                   <th>Setor</th>
-                  <th>Valor</th>
-                  <th>Vencimento</th>
+                  {filtroTipo === 'CONTRATOS' && <th>Valor</th>}
+                  <th>{filtroTipo === 'CONTRATOS' ? 'Vencimento' : 'Revisão'}</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {contratosFiltrados.map((c) => (
-                  <tr key={c.id}>
-                    <td style={{ fontWeight: 500 }}>{c.empresa}</td>
-                    <td>{c.setor?.nome}</td>
-                    <td>{c.valor ? `R$ ${c.valor}` : '-'}</td>
-                    <td>{c.data_vigencia_fim ? new Date(c.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
+                {dadosFiltrados.map((item) => (
+                  <tr key={item.id}>
+                    <td style={{ fontWeight: 500 }}>{filtroTipo === 'CONTRATOS' ? item.empresa : item.titulo}</td>
+                    <td>{item.setor?.nome}</td>
+                    {filtroTipo === 'CONTRATOS' && <td>{item.valor ? `R$ ${item.valor}` : '-'}</td>}
+                    <td>{item.data_vigencia_fim ? new Date(item.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
                     <td>
-                      <span className={`badge ${getStatusBadgeClass(c.status)}`}>
-                        {c.status}
+                      <span className={`badge ${getStatusBadgeClass(item.status)}`}>
+                        {item.status}
                       </span>
                     </td>
                   </tr>

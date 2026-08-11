@@ -45,6 +45,14 @@ const Sidebar = ({ activeTab, setActiveTab, userRole, onLogout, theme, setTheme 
         </div>
 
         <div 
+          className={`nav-item ${activeTab === 'itts' ? 'active' : ''}`}
+          onClick={() => setActiveTab('itts')}
+        >
+          <FileText size={20} />
+          <span>Instruções (ITT)</span>
+        </div>
+
+        <div 
           className={`nav-item ${activeTab === 'relatorios' ? 'active' : ''}`}
           onClick={() => setActiveTab('relatorios')}
         >

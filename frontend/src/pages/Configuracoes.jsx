@@ -305,7 +305,8 @@ const Configuracoes = () => {
           <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
             Você pode utilizar as tags abaixo no Assunto ou no Corpo do e-mail. Elas serão substituídas pelos dados do contrato no momento do envio:
             <br/><br/>
-            <code>{`{{empresa}}`}</code> : Nome da Empresa<br/>
+            <code>{`{{tipo}}`}</code> : Tipo do documento (Contrato ou Instrução Técnica)<br/>
+            <code>{`{{empresa}}`}</code> : Nome da Empresa (ou Título, no caso de ITT)<br/>
             <code>{`{{setor}}`}</code> : Nome do Setor Responsável<br/>
             <code>{`{{dias}}`}</code> : Dias restantes para o vencimento<br/>
             <code>{`{{data_vencimento}}`}</code> : Data de vigência formatada (ex: 31/12/2026)

@@ -1,29 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Search, Edit, Trash2, AlertCircle, CheckCircle, Clock, FileText, Mail } from 'lucide-react';
-import ModalEditarContrato from '../components/ModalEditarContrato';
+import { Search, Edit, Trash2, AlertCircle, CheckCircle, Clock, FileText, Mail, Plus } from 'lucide-react';
+import ModalEditarItt from '../components/ModalEditarItt';
+import ModalNovoItt from '../components/ModalNovoItt';
 import DocumentViewerModal from '../components/DocumentViewerModal';
 
-const Contratos = ({ userRole, userSector }) => {
-  const [contracts, setContracts] = useState([]);
-  const [filteredContracts, setFilteredContracts] = useState([]);
+const Itts = ({ userRole, userSector }) => {
+  const [itts, setItts] = useState([]);
+  const [filteredItts, setFilteredItts] = useState([]);
   const [search, setSearch] = useState('');
-  const [editingContract, setEditingContract] = useState(null);
+  const [editingItt, setEditingItt] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [viewerData, setViewerData] = useState(null);
 
   useEffect(() => {
-    fetchContracts();
+    fetchItts();
   }, [userRole, userSector]);
 
-  const fetchContracts = async () => {
+  const fetchItts = async () => {
     try {
       const url = userRole === 'ADMIN' 
-        ? '/api/contratos' 
-        : `/api/contratos?setorId=${userSector}`;
+        ? '/api/itts' 
+        : `/api/itts?setorId=${userSector}`;
       
       const res = await axios.get(url);
-      setContracts(res.data);
-      setFilteredContracts(res.data);
+      setItts(res.data);
+      setFilteredItts(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -31,45 +33,43 @@ const Contratos = ({ userRole, userSector }) => {
 
   useEffect(() => {
     if (search.trim() === '') {
-      setFilteredContracts(contracts);
+      setFilteredItts(itts);
     } else {
       const lower = search.toLowerCase();
-      setFilteredContracts(contracts.filter(c => 
-        c.empresa.toLowerCase().includes(lower) || 
-        (c.setor?.nome || '').toLowerCase().includes(lower)
+      setFilteredItts(itts.filter(i => 
+        i.titulo.toLowerCase().includes(lower) || 
+        (i.setor?.nome || '').toLowerCase().includes(lower)
       ));
     }
-  }, [search, contracts]);
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-  };
+  }, [search, itts]);
 
   const getStatusBadge = (status) => {
     switch(status) {
       case 'VIGENTE': return <span className="badge badge-vigente"><CheckCircle size={12}/> Vigente</span>;
       case 'A_VENCER': return <span className="badge badge-a_vencer"><Clock size={12}/> A Vencer</span>;
       case 'VENCIDO': return <span className="badge badge-vencido"><AlertCircle size={12}/> Vencido</span>;
+      case 'REVISADO': return <span className="badge badge-renovado"><CheckCircle size={12}/> Revisado</span>;
+      case 'CANCELADO': return <span className="badge badge-vencido"><AlertCircle size={12}/> Cancelado</span>;
       default: return <span className="badge">{status}</span>;
     }
   };
 
-  const handleDelete = async (id, empresa) => {
-    if (window.confirm(`Tem certeza que deseja excluir o contrato da empresa ${empresa}?`)) {
+  const handleDelete = async (id, titulo) => {
+    if (window.confirm(`Tem certeza que deseja excluir a ITT "${titulo}"?`)) {
       try {
-        await axios.delete(`/api/contratos/${id}`);
-        setContracts(contracts.filter(c => c.id !== id));
+        await axios.delete(`/api/itts/${id}`);
+        setItts(itts.filter(i => i.id !== id));
       } catch (err) {
         console.error(err);
-        alert('Erro ao excluir contrato.');
+        alert('Erro ao excluir ITT.');
       }
     }
   };
 
-  const handleSendAlert = async (id, empresa) => {
-    if (window.confirm(`Deseja enviar um e-mail de alerta manual para o contrato da empresa ${empresa}?`)) {
+  const handleSendAlert = async (id, titulo) => {
+    if (window.confirm(`Deseja enviar um e-mail de alerta manual para a ITT "${titulo}"?`)) {
       try {
-        await axios.post(`/api/contratos/${id}/alert-manual`);
+        await axios.post(`/api/itts/${id}/alert-manual`);
         alert('E-mail enviado com sucesso!');
       } catch (err) {
         console.error(err);
@@ -78,37 +78,37 @@ const Contratos = ({ userRole, userSector }) => {
     }
   };
 
-  const handleViewPdfs = async (c) => {
+  const handleViewPdfs = async (itt) => {
     try {
-      const res = await axios.get(`/api/contratos/${c.id}/aditivos`);
-      const aditivos = res.data;
+      const res = await axios.get(`/api/itts/${itt.id}/revisoes`);
+      const revisoes = res.data;
       
       const docs = [];
-      aditivos.forEach((ad) => {
-        if (ad.anexos) {
+      revisoes.forEach((r) => {
+        if (r.anexos) {
           docs.push({
-            id: `aditivo-${ad.id}`,
-            title: `Aditivo - ${new Date(ad.criado_em).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} (${ad.descricao || 'Sem descrição'})`,
-            url: `/api/contratos/aditivos/${ad.id}/anexo`
+            id: `revisao-${r.id}`,
+            title: `Revisão - ${new Date(r.criado_em).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} (${r.descricao || 'Sem descrição'})`,
+            url: `/api/itts/revisoes/${r.id}/anexo`
           });
         }
       });
 
-      if (c.anexos) {
+      if (itt.anexos) {
         docs.push({
-          id: `original-${c.id}`,
-          title: 'Contrato Original',
-          url: `/api/contratos/${c.id}/anexo`
+          id: `original-${itt.id}`,
+          title: 'ITT Original',
+          url: `/api/itts/${itt.id}/anexo`
         });
       }
       
       if (docs.length === 0) {
-        alert('Nenhum PDF encontrado para este contrato.');
+        alert('Nenhum PDF encontrado para esta ITT.');
         return;
       }
       
       setViewerData({
-        title: `Contrato: ${c.empresa}`,
+        title: `ITT: ${itt.titulo}`,
         documents: docs
       });
     } catch (err) {
@@ -118,18 +118,39 @@ const Contratos = ({ userRole, userSector }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <header>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 600 }}>Gestão de Contratos</h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>
-          Visualize, pesquise, edite ou remova os contratos cadastrados no sistema.
-        </p>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 600 }}>Instruções Técnicas de Trabalho (ITT)</h1>
+          <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>
+            Visualize, pesquise, crie ou edite as ITTs cadastradas no sistema.
+          </p>
+        </div>
+        {userRole === 'ADMIN' && (
+          <button 
+            onClick={() => setIsCreating(true)}
+            style={{
+              background: 'var(--primary)',
+              color: '#fff',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Plus size={18} /> Nova ITT
+          </button>
+        )}
       </header>
 
       <section className="glass-card" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
         <Search size={20} color="var(--text-muted)" />
         <input 
           type="text" 
-          placeholder="Pesquisar por empresa ou setor..." 
+          placeholder="Pesquisar por título ou setor..." 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -148,27 +169,27 @@ const Contratos = ({ userRole, userSector }) => {
         <table>
           <thead>
             <tr>
-              <th>Empresa</th>
+              <th>Título</th>
               <th>Setor Resp.</th>
-              <th>Valor</th>
+              <th>Emissão</th>
               <th>Vencimento</th>
               <th>Status</th>
-              <th>Último Aditivo</th>
+              <th>Última Revisão</th>
               <th style={{ textAlign: 'right' }}>Ações</th>
             </tr>
           </thead>
           <tbody>
-            {filteredContracts.map(c => (
-              <tr key={c.id}>
-                <td style={{ fontWeight: 500 }}>{c.empresa}</td>
-                <td>{c.setor?.nome}</td>
-                <td>{c.valor ? formatCurrency(c.valor) : '-'}</td>
-                <td>{c.data_vigencia_fim ? new Date(c.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
-                <td>{getStatusBadge(c.status)}</td>
+            {filteredItts.map(i => (
+              <tr key={i.id}>
+                <td style={{ fontWeight: 500 }}>{i.titulo}</td>
+                <td>{i.setor?.nome}</td>
+                <td>{i.data_emissao ? new Date(i.data_emissao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</td>
+                <td>{i.data_vigencia_fim ? new Date(i.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
+                <td>{getStatusBadge(i.status)}</td>
                 <td>
-                  {c.aditivos && c.aditivos.length > 0 ? (
+                  {i.revisoes && i.revisoes.length > 0 ? (
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                      Sim ({new Date(c.aditivos[0].criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })})
+                      Sim ({new Date(i.revisoes[0].criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })})
                     </span>
                   ) : (
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Não</span>
@@ -176,9 +197,9 @@ const Contratos = ({ userRole, userSector }) => {
                 </td>
                 <td style={{ textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    {(c.anexos || (c.aditivos && c.aditivos.length > 0)) && (
+                    {(i.anexos || (i.revisoes && i.revisoes.length > 0)) && (
                       <button 
-                        onClick={() => handleViewPdfs(c)}
+                        onClick={() => handleViewPdfs(i)}
                         style={{ ...iconBtnStyle, color: 'var(--primary)', textDecoration: 'none' }}
                         title="Visualizar PDFs"
                       >
@@ -188,21 +209,21 @@ const Contratos = ({ userRole, userSector }) => {
                     {userRole === 'ADMIN' && (
                       <>
                         <button 
-                          onClick={() => setEditingContract(c)}
+                          onClick={() => setEditingItt(i)}
                           style={iconBtnStyle}
                           title="Editar"
                         >
                           <Edit size={18} />
                         </button>
                         <button 
-                          onClick={() => handleSendAlert(c.id, c.empresa)}
+                          onClick={() => handleSendAlert(i.id, i.titulo)}
                           style={{ ...iconBtnStyle, color: 'var(--warning)' }}
                           title="Enviar Alerta Manual"
                         >
                           <Mail size={18} />
                         </button>
                         <button 
-                          onClick={() => handleDelete(c.id, c.empresa)}
+                          onClick={() => handleDelete(i.id, i.titulo)}
                           style={{ ...iconBtnStyle, color: 'var(--danger)' }}
                           title="Excluir"
                         >
@@ -214,10 +235,10 @@ const Contratos = ({ userRole, userSector }) => {
                 </td>
               </tr>
             ))}
-            {filteredContracts.length === 0 && (
+            {filteredItts.length === 0 && (
               <tr>
                 <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                  Nenhum contrato encontrado.
+                  Nenhuma ITT encontrada.
                 </td>
               </tr>
             )}
@@ -225,12 +246,20 @@ const Contratos = ({ userRole, userSector }) => {
         </table>
       </section>
 
-      {editingContract && (
-        <ModalEditarContrato 
-          contrato={editingContract}
-          onClose={() => setEditingContract(null)}
+      {editingItt && (
+        <ModalEditarItt 
+          itt={editingItt}
+          onClose={() => setEditingItt(null)}
           onSave={() => {
-            fetchContracts(); // Recarrega os dados completos para pegar os Joins (ex: setor nome atualizado)
+            fetchItts();
+          }}
+        />
+      )}
+      {isCreating && (
+        <ModalNovoItt 
+          onClose={() => setIsCreating(false)}
+          onSave={() => {
+            fetchItts();
           }}
         />
       )}
@@ -259,4 +288,4 @@ const iconBtnStyle = {
   transition: 'background 0.2s'
 };
 
-export default Contratos;
+export default Itts;

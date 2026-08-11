@@ -18,6 +18,7 @@ const backupRoutes = require('./routes/backup');
 const usersRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
 const alertasRoutes = require('./routes/alertas');
+const ittsRouter = require('./routes/itts');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/setores', sectorsRoutes);
@@ -26,6 +27,7 @@ app.use('/api/usuarios', usersRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/alertas', alertasRoutes);
+app.use('/api/itts', ittsRouter);
 
 // Simple healthcheck
 app.get('/health', (req, res) => res.json({ status: 'ok' }));

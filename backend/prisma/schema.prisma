@@ -14,6 +14,7 @@ model Setor {
   id        Int        @id @default(autoincrement())
   nome      String     @unique
   contratos Contrato[]
+  itts      Itt[]
   usuarios  Usuario[]  @relation("UsuarioSetor")
 }
 
@@ -74,4 +75,42 @@ model Configuracao {
   id    Int    @id @default(autoincrement())
   chave String @unique
   valor String
+}
+
+model Itt {
+  id                   Int               @id @default(autoincrement())
+  titulo               String
+  setorId              Int
+  setor                Setor             @relation(fields: [setorId], references: [id])
+  data_emissao         DateTime?
+  data_vigencia_fim    DateTime?
+  dias_alerta          Int               @default(30)
+  status               String            @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, REVISADO, CANCELADO
+  observacao           String?
+  anexos               String?           
+  criado_por           String?
+  atualizado_em        DateTime          @updatedAt
+  criado_em            DateTime          @default(now())
+  HistoricoAlertaItt   HistoricoAlertaItt[]
+  revisoes             RevisaoItt[]
+}
+
+model RevisaoItt {
+  id                 Int      @id @default(autoincrement())
+  ittId              Int
+  itt                Itt      @relation(fields: [ittId], references: [id], onDelete: Cascade)
+  descricao          String?
+  nova_data_vigencia DateTime
+  anexos             String?
+  criado_em          DateTime @default(now())
+}
+
+model HistoricoAlertaItt {
+  id           Int      @id @default(autoincrement())
+  ittId        Int
+  itt          Itt      @relation(fields: [ittId], references: [id], onDelete: Cascade)
+  data_envio   DateTime @default(now())
+  destinatarios String
+  status_envio String
+  erro         String?
 }
