@@ -111,7 +111,7 @@ async function checkContractsAndAlert() {
             .replace(/{{dias}}/g, diasAbs)
             .replace(/{{prazo_texto}}/g, prazoTexto)
             .replace(/{{data_vencimento}}/g, dataFormatada)
-            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ EM' : 'VENCEU HÁ');
 
           html = html
             .replace(/vencer[áa] em {{dias}} dias/gi, prazoTexto)
@@ -121,7 +121,7 @@ async function checkContractsAndAlert() {
             .replace(/{{dias}}/g, diasAbs)
             .replace(/{{prazo_texto}}/g, prazoTexto)
             .replace(/{{data_vencimento}}/g, dataFormatada)
-            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ EM' : 'VENCEU HÁ');
 
           const { success, error } = await sendEmail(uniqueEmails, subject, html);
 
@@ -232,7 +232,7 @@ async function checkIttsAndAlert() {
             .replace(/{{dias}}/g, diasAbs)
             .replace(/{{prazo_texto}}/g, prazoTexto)
             .replace(/{{data_vencimento}}/g, dataFormatada)
-            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ EM' : 'VENCEU HÁ');
 
           html = html
             .replace(/tem revisão\/vencimento em {{dias}} dias/gi, prazoTexto)
@@ -243,7 +243,7 @@ async function checkIttsAndAlert() {
             .replace(/{{dias}}/g, diasAbs)
             .replace(/{{prazo_texto}}/g, prazoTexto)
             .replace(/{{data_vencimento}}/g, dataFormatada)
-            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ EM' : 'VENCEU HÁ');
 
           const { success, error } = await sendEmail(uniqueEmails, subject, html);
 
@@ -338,7 +338,7 @@ async function checkDocumentosAndAlert() {
             .replace(/{{dias}}/g, diasAbs)
             .replace(/{{prazo_texto}}/g, prazoTexto)
             .replace(/{{data_vencimento}}/g, dataFormatada)
-            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ EM' : 'VENCEU HÁ');
 
           html = html
             .replace(/vencer[áa] em {{dias}} dias/gi, prazoTexto)
@@ -348,7 +348,7 @@ async function checkDocumentosAndAlert() {
             .replace(/{{dias}}/g, diasAbs)
             .replace(/{{prazo_texto}}/g, prazoTexto)
             .replace(/{{data_vencimento}}/g, dataFormatada)
-            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ EM' : 'VENCEU HÁ');
 
           const { success, error } = await sendEmail(uniqueEmails, subject, html);
 
