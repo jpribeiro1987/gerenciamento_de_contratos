@@ -37,7 +37,7 @@ async function checkContractsAndAlert() {
 
     const activeContracts = await prisma.contrato.findMany({
       where: {
-        status: { in: ['VIGENTE', 'A_VENCER'] },
+        status: { in: ['VIGENTE', 'A_VENCER', 'VENCIDO'] },
         data_vigencia_fim: { not: null }
       },
       include: {
@@ -55,28 +55,32 @@ async function checkContractsAndAlert() {
       const diffTime = contract.data_vigencia_fim.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Threshold hit
-      if (diffDays <= contract.dias_alerta && diffDays >= 0) {
+      if (diffDays <= contract.dias_alerta) {
         
         // Update status if it's not already A_VENCER or VENCIDO
-        if (contract.status === 'VIGENTE') {
+        if (contract.status === 'VIGENTE' && diffDays >= 0) {
           await prisma.contrato.update({
             where: { id: contract.id },
             data: { status: 'A_VENCER' }
           });
+        } else if (contract.status !== 'VENCIDO' && diffDays < 0) {
+          await prisma.contrato.update({
+            where: { id: contract.id },
+            data: { status: 'VENCIDO' }
+          });
         }
 
-        // Check if we already sent an automatic email recently to avoid spamming everyday
+        // Check if we already sent an automatic email today
         const lastAlert = await prisma.historicoAlerta.findFirst({
           where: { 
             contratoId: contract.id,
-            status_envio: 'SUCESSO' // Ignorar SUCESSO_MANUAL para não bloquear o robô
+            status_envio: 'SUCESSO'
           },
           orderBy: { data_envio: 'desc' }
         });
 
-        const shouldSend = !lastAlert || 
-          (new Date().getTime() - lastAlert.data_envio.getTime()) > (7 * 24 * 60 * 60 * 1000); // 7 days interval
+        // Disparo é DIÁRIO a partir dos "Dias p/ Alerta"
+        let shouldSend = !lastAlert || (new Date().getTime() - lastAlert.data_envio.getTime()) > (23 * 60 * 60 * 1000);
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para o contrato ${contract.id} (${contract.empresa})`);
@@ -128,14 +132,8 @@ async function checkContractsAndAlert() {
             }
           });
         } else {
-          console.log(`[AlertJob] Pulando contrato ${contract.id} (${contract.empresa}) - E-mail já enviado nos últimos 7 dias.`);
+          console.log(`[AlertJob] Pulando contrato ${contract.id} (${contract.empresa}) - Alerta diário já enviado hoje.`);
         }
-      } else if (diffDays < 0 && contract.status !== 'VENCIDO') {
-        // Contract is expired
-        await prisma.contrato.update({
-          where: { id: contract.id },
-          data: { status: 'VENCIDO' }
-        });
       }
     }
   } catch (err) {
@@ -150,7 +148,7 @@ async function checkIttsAndAlert() {
 
     const activeItts = await prisma.itt.findMany({
       where: {
-        status: { in: ['VIGENTE', 'A_VENCER'] },
+        status: { in: ['VIGENTE', 'A_VENCER', 'VENCIDO'] },
         data_vigencia_fim: { not: null }
       },
       include: {
@@ -168,11 +166,16 @@ async function checkIttsAndAlert() {
       const diffTime = itt.data_vigencia_fim.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays <= itt.dias_alerta && diffDays >= 0) {
-        if (itt.status === 'VIGENTE') {
+      if (diffDays <= 90) {
+        if (itt.status === 'VIGENTE' && diffDays >= 0) {
           await prisma.itt.update({
             where: { id: itt.id },
             data: { status: 'A_VENCER' }
+          });
+        } else if (itt.status !== 'VENCIDO' && diffDays < 0) {
+          await prisma.itt.update({
+            where: { id: itt.id },
+            data: { status: 'VENCIDO' }
           });
         }
 
@@ -184,8 +187,21 @@ async function checkIttsAndAlert() {
           orderBy: { data_envio: 'desc' }
         });
 
-        const shouldSend = !lastAlert || 
-          (new Date().getTime() - lastAlert.data_envio.getTime()) > (7 * 24 * 60 * 60 * 1000);
+        let shouldSend = false;
+
+        if (diffDays > 0) {
+          const isMarker = (diffDays === 90 || diffDays === 60 || diffDays === 30);
+          if (isMarker) {
+            shouldSend = true;
+          } else if (!lastAlert) {
+            shouldSend = true;
+          } else {
+            shouldSend = (new Date().getTime() - lastAlert.data_envio.getTime()) > (30 * 24 * 60 * 60 * 1000);
+          }
+        } else {
+          // Vencido (diffDays <= 0)
+          shouldSend = !lastAlert || (new Date().getTime() - lastAlert.data_envio.getTime()) > (6.5 * 24 * 60 * 60 * 1000);
+        }
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para ITT ${itt.id} (${itt.titulo})`);
@@ -236,13 +252,8 @@ async function checkIttsAndAlert() {
             }
           });
         } else {
-          console.log(`[AlertJob] Pulando ITT ${itt.id} (${itt.titulo}) - E-mail já enviado nos últimos 7 dias.`);
+          console.log(`[AlertJob] Pulando ITT ${itt.id} (${itt.titulo}) - E-mail já enviado recentemente ou fora da data alvo.`);
         }
-      } else if (diffDays < 0 && itt.status !== 'VENCIDO') {
-        await prisma.itt.update({
-          where: { id: itt.id },
-          data: { status: 'VENCIDO' }
-        });
       }
     }
   } catch (err) {
@@ -257,7 +268,7 @@ async function checkDocumentosAndAlert() {
 
     const activeDocs = await prisma.documento.findMany({
       where: {
-        status: { in: ['VIGENTE', 'A_VENCER'] },
+        status: { in: ['VIGENTE', 'A_VENCER', 'VENCIDO'] },
         data_vigencia_fim: { not: null }
       },
       include: {
@@ -273,11 +284,16 @@ async function checkDocumentosAndAlert() {
       const diffTime = doc.data_vigencia_fim.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays <= doc.dias_alerta && diffDays >= 0) {
-        if (doc.status === 'VIGENTE') {
+      if (diffDays <= doc.dias_alerta) {
+        if (doc.status === 'VIGENTE' && diffDays >= 0) {
           await prisma.documento.update({
             where: { id: doc.id },
             data: { status: 'A_VENCER' }
+          });
+        } else if (doc.status !== 'VENCIDO' && diffDays < 0) {
+          await prisma.documento.update({
+            where: { id: doc.id },
+            data: { status: 'VENCIDO' }
           });
         }
 
@@ -289,8 +305,8 @@ async function checkDocumentosAndAlert() {
           orderBy: { data_envio: 'desc' }
         });
 
-        const shouldSend = !lastAlert || 
-          (new Date().getTime() - lastAlert.data_envio.getTime()) > (7 * 24 * 60 * 60 * 1000);
+        // Disparo é DIÁRIO a partir dos "Dias p/ Alerta"
+        let shouldSend = !lastAlert || (new Date().getTime() - lastAlert.data_envio.getTime()) > (23 * 60 * 60 * 1000);
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para Documento ${doc.id} (${doc.titulo})`);
@@ -339,13 +355,8 @@ async function checkDocumentosAndAlert() {
             }
           });
         } else {
-          console.log(`[AlertJob] Pulando Documento ${doc.id} (${doc.titulo}) - E-mail já enviado nos últimos 7 dias.`);
+          console.log(`[AlertJob] Pulando Documento ${doc.id} (${doc.titulo}) - Alerta diário já enviado hoje.`);
         }
-      } else if (diffDays < 0 && doc.status !== 'VENCIDO') {
-        await prisma.documento.update({
-          where: { id: doc.id },
-          data: { status: 'VENCIDO' }
-        });
       }
     }
   } catch (err) {
