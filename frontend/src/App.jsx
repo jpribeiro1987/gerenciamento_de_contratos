@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import NovoContrato from './pages/NovoContrato';
 import Contratos from './pages/Contratos';
 import Itts from './pages/Itts';
+import Documentos from './pages/Documentos';
 import SetoresUsuarios from './pages/SetoresUsuarios';
 import Login from './pages/Login';
 import Configuracoes from './pages/Configuracoes';
@@ -61,6 +62,7 @@ function App() {
         {activeTab === 'configuracoes' && <Configuracoes />}
         {activeTab === 'contratos' && <Contratos userRole={userRole} userSector={userSector} />}
         {activeTab === 'itts' && <Itts userRole={userRole} userSector={userSector} />}
+        {activeTab === 'documentos' && <Documentos userRole={userRole} userSector={userSector} />}
         {activeTab === 'setores' && <SetoresUsuarios />}
         {activeTab === 'relatorios' && <Relatorios userRole={userRole} userSector={userSector} />}
         {activeTab === 'fila_emails' && <FilaEmails userRole={userRole} />}

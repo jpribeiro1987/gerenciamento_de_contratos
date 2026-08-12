@@ -21,6 +21,7 @@ async function scheduleAlertJob(timeString = "06:00") {
     console.log(`[AlertJob] Executando verificação diária... (${new Date().toLocaleString()})`);
     await checkContractsAndAlert();
     await checkIttsAndAlert();
+    await checkDocumentosAndAlert();
   }, {
     timezone: "America/Sao_Paulo"
   });
@@ -249,6 +250,109 @@ async function checkIttsAndAlert() {
   }
 }
 
+async function checkDocumentosAndAlert() {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const activeDocs = await prisma.documento.findMany({
+      where: {
+        status: { in: ['VIGENTE', 'A_VENCER'] },
+        data_vigencia_fim: { not: null }
+      },
+      include: {
+        setor: {
+          include: { usuarios: true }
+        }
+      }
+    });
+
+    for (const doc of activeDocs) {
+      if (!doc.data_vigencia_fim) continue;
+
+      const diffTime = doc.data_vigencia_fim.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= doc.dias_alerta && diffDays >= 0) {
+        if (doc.status === 'VIGENTE') {
+          await prisma.documento.update({
+            where: { id: doc.id },
+            data: { status: 'A_VENCER' }
+          });
+        }
+
+        const lastAlert = await prisma.historicoAlertaDocumento.findFirst({
+          where: { 
+            documentoId: doc.id,
+            status_envio: 'SUCESSO'
+          },
+          orderBy: { data_envio: 'desc' }
+        });
+
+        const shouldSend = !lastAlert || 
+          (new Date().getTime() - lastAlert.data_envio.getTime()) > (7 * 24 * 60 * 60 * 1000);
+
+        if (shouldSend) {
+          console.log(`[AlertJob] Enviando alerta para Documento ${doc.id} (${doc.titulo})`);
+          const emails = doc.setor.usuarios.map(u => u.email);
+          const uniqueEmails = [...new Set(emails)].join(',');
+          
+          const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT' } });
+          const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY' } });
+
+          let subject = configSubject?.valor || `Alerta de Vencimento: Documento {{empresa}}`;
+          let html = configBody?.valor || `<p>O Documento <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p><p>Por favor, providencie a renovação.</p>`;
+
+          const dataFormatada = doc.data_vigencia_fim.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+          
+          const diasAbs = Math.abs(diffDays);
+          const prazoTexto = diffDays > 0 ? `vencerá em ${diasAbs} dias` :
+                             diffDays === 0 ? `vence hoje` :
+                             `venceu há ${diasAbs} dias`;
+
+          subject = subject
+            .replace(/vencer[áa] em {{dias}} dias/gi, prazoTexto)
+            .replace(/{{tipo}}/g, 'Documento/CND')
+            .replace(/{{empresa}}/g, doc.titulo)
+            .replace(/{{setor}}/g, doc.setor.nome)
+            .replace(/{{dias}}/g, diasAbs)
+            .replace(/{{prazo_texto}}/g, prazoTexto)
+            .replace(/{{data_vencimento}}/g, dataFormatada);
+
+          html = html
+            .replace(/vencer[áa] em {{dias}} dias/gi, prazoTexto)
+            .replace(/{{tipo}}/g, 'Documento/CND')
+            .replace(/{{empresa}}/g, doc.titulo)
+            .replace(/{{setor}}/g, doc.setor.nome)
+            .replace(/{{dias}}/g, diasAbs)
+            .replace(/{{prazo_texto}}/g, prazoTexto)
+            .replace(/{{data_vencimento}}/g, dataFormatada);
+
+          const { success, error } = await sendEmail(uniqueEmails, subject, html);
+
+          await prisma.historicoAlertaDocumento.create({
+            data: {
+              documentoId: doc.id,
+              destinatarios: uniqueEmails,
+              status_envio: success ? 'SUCESSO' : 'ERRO',
+              erro: error
+            }
+          });
+        } else {
+          console.log(`[AlertJob] Pulando Documento ${doc.id} (${doc.titulo}) - E-mail já enviado nos últimos 7 dias.`);
+        }
+      } else if (diffDays < 0 && doc.status !== 'VENCIDO') {
+        await prisma.documento.update({
+          where: { id: doc.id },
+          data: { status: 'VENCIDO' }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Error running Documento alert job:', err);
+  }
+}
+
 async function initJobs() {
   try {
     const config = await prisma.configuracao.findUnique({ where: { chave: 'ALERT_CRON_TIME' } });
@@ -259,4 +363,4 @@ async function initJobs() {
   }
 }
 
-module.exports = { checkContractsAndAlert, checkIttsAndAlert, scheduleAlertJob, initJobs };
+module.exports = { checkContractsAndAlert, checkIttsAndAlert, checkDocumentosAndAlert, scheduleAlertJob, initJobs };

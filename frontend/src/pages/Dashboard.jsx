@@ -7,9 +7,11 @@ import ModalObservacao from '../components/ModalObservacao';
 const Dashboard = ({ userRole, userSector }) => {
   const [contracts, setContracts] = useState([]);
   const [itts, setItts] = useState([]);
+  const [documentos, setDocumentos] = useState([]);
   
   const [metrics, setMetrics] = useState({ total: 0, vencendo: 0, vencidos: 0, valorTotal: 0 });
   const [ittMetrics, setIttMetrics] = useState({ total: 0, vencendo: 0, vencidos: 0 });
+  const [docMetrics, setDocMetrics] = useState({ total: 0, vencendo: 0, vencidos: 0 });
 
   const [selectedContract, setSelectedContract] = useState(null);
   
@@ -121,17 +123,21 @@ const Dashboard = ({ userRole, userSector }) => {
       try {
         const urlContratos = userRole === 'ADMIN' ? '/api/contratos' : `/api/contratos?setorId=${userSector}`;
         const urlItts = userRole === 'ADMIN' ? '/api/itts' : `/api/itts?setorId=${userSector}`;
+        const urlDocs = userRole === 'ADMIN' ? '/api/documentos' : `/api/documentos?setorId=${userSector}`;
         
-        const [resContratos, resItts] = await Promise.all([
+        const [resContratos, resItts, resDocs] = await Promise.all([
           axios.get(urlContratos),
-          axios.get(urlItts)
+          axios.get(urlItts),
+          axios.get(urlDocs)
         ]);
         
         const dataContratos = resContratos.data;
         const dataItts = resItts.data;
+        const dataDocs = resDocs.data;
         
         setContracts(dataContratos);
         setItts(dataItts);
+        setDocumentos(dataDocs);
         
         // Compute metrics for Contratos
         setMetrics({
@@ -146,6 +152,13 @@ const Dashboard = ({ userRole, userSector }) => {
           total: dataItts.length,
           vencendo: dataItts.filter(i => i.status === 'A_VENCER').length,
           vencidos: dataItts.filter(i => i.status === 'VENCIDO').length,
+        });
+
+        // Compute metrics for Documentos
+        setDocMetrics({
+          total: dataDocs.length,
+          vencendo: dataDocs.filter(d => d.status === 'A_VENCER').length,
+          vencidos: dataDocs.filter(d => d.status === 'VENCIDO').length,
         });
 
       } catch (err) {
@@ -208,6 +221,7 @@ const Dashboard = ({ userRole, userSector }) => {
   }
 
   const ittsAVencer = itts.filter(i => i.status === 'A_VENCER' || i.status === 'VENCIDO');
+  const docsAVencer = documentos.filter(d => d.status === 'A_VENCER' || d.status === 'VENCIDO');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -263,6 +277,25 @@ const Dashboard = ({ userRole, userSector }) => {
           <div className="glass-card metric-card">
             <span className="metric-title">Vencidos</span>
             <span className={`metric-value ${ittMetrics.vencidos > 0 ? 'danger' : ''}`}>{ittMetrics.vencidos}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* METRICS ROW 3: Documentos */}
+      <section>
+        <h3 style={{ marginBottom: '16px', fontSize: '1.2rem' }}>Métricas de CNDs/Documentos</h3>
+        <div className="metrics-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <div className="glass-card metric-card">
+            <span className="metric-title">Total</span>
+            <span className="metric-value">{docMetrics.total}</span>
+          </div>
+          <div className="glass-card metric-card">
+            <span className="metric-title">Vencendo</span>
+            <span className={`metric-value ${docMetrics.vencendo > 0 ? 'warning' : ''}`}>{docMetrics.vencendo}</span>
+          </div>
+          <div className="glass-card metric-card">
+            <span className="metric-title">Vencidos</span>
+            <span className={`metric-value ${docMetrics.vencidos > 0 ? 'danger' : ''}`}>{docMetrics.vencidos}</span>
           </div>
         </div>
       </section>
@@ -357,6 +390,42 @@ const Dashboard = ({ userRole, userSector }) => {
                   <td>{i.setor?.nome}</td>
                   <td>{i.data_vigencia_fim ? new Date(i.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</td>
                   <td>{getStatusBadge(i.status)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+
+      {/* Documentos a Vencer Section */}
+      {docsAVencer.length > 0 && (
+        <section className="glass-card table-container" style={{ borderLeft: '4px solid var(--danger)' }}>
+          <div style={{ marginBottom: '24px', fontSize: '1.1rem', fontWeight: 600, color: 'var(--danger)' }}>
+            <AlertCircle size={20} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />
+            Atenção: Documentos e CNDs a Vencer ou Vencidos
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Título</th>
+                <th>Setor Resp.</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {docsAVencer.map(d => (
+                <tr key={d.id}>
+                  <td>
+                    <span style={{ 
+                      padding: '4px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '0.8rem', fontWeight: 600 
+                    }}>{d.tipo}</span>
+                  </td>
+                  <td style={{ fontWeight: 500 }}>{d.titulo}</td>
+                  <td>{d.setor?.nome}</td>
+                  <td>{d.data_vigencia_fim ? new Date(d.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</td>
+                  <td>{getStatusBadge(d.status)}</td>
                 </tr>
               ))}
             </tbody>

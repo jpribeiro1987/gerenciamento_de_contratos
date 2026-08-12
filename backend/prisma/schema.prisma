@@ -11,11 +11,12 @@ datasource db {
 }
 
 model Setor {
-  id        Int        @id @default(autoincrement())
-  nome      String     @unique
-  contratos Contrato[]
-  itts      Itt[]
-  usuarios  Usuario[]  @relation("UsuarioSetor")
+  id         Int         @id @default(autoincrement())
+  nome       String      @unique
+  contratos  Contrato[]
+  itts       Itt[]
+  documentos Documento[]
+  usuarios   Usuario[]   @relation("UsuarioSetor")
 }
 
 model Usuario {
@@ -109,6 +110,46 @@ model HistoricoAlertaItt {
   id           Int      @id @default(autoincrement())
   ittId        Int
   itt          Itt      @relation(fields: [ittId], references: [id], onDelete: Cascade)
+  data_envio   DateTime @default(now())
+  destinatarios String
+  status_envio String
+  erro         String?
+}
+
+model Documento {
+  id                   Int               @id @default(autoincrement())
+  tipo                 String            @default("CND") // CND, CERTIFICADO, ALVARA, OUTROS
+  orgao_emissor        String?           
+  titulo               String
+  setorId              Int
+  setor                Setor             @relation(fields: [setorId], references: [id])
+  data_emissao         DateTime?
+  data_vigencia_fim    DateTime?
+  dias_alerta          Int               @default(30)
+  status               String            @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, RENOVADO, CANCELADO
+  observacao           String?
+  anexos               String?           
+  criado_por           String?
+  atualizado_em        DateTime          @updatedAt
+  criado_em            DateTime          @default(now())
+  HistoricoAlertaDoc   HistoricoAlertaDocumento[]
+  renovacoes           RenovacaoDocumento[]
+}
+
+model RenovacaoDocumento {
+  id                 Int      @id @default(autoincrement())
+  documentoId        Int
+  documento          Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+  descricao          String?
+  nova_data_vigencia DateTime
+  anexos             String?
+  criado_em          DateTime @default(now())
+}
+
+model HistoricoAlertaDocumento {
+  id           Int      @id @default(autoincrement())
+  documentoId  Int
+  documento    Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
   data_envio   DateTime @default(now())
   destinatarios String
   status_envio String
