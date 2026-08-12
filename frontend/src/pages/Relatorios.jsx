@@ -5,6 +5,7 @@ import { Printer, Filter } from 'lucide-react';
 const Relatorios = ({ userRole, userSector }) => {
   const [contratos, setContratos] = useState([]);
   const [itts, setItts] = useState([]);
+  const [documentos, setDocumentos] = useState([]);
   const [setores, setSetores] = useState([]);
   
   // Filtros
@@ -18,6 +19,7 @@ const Relatorios = ({ userRole, userSector }) => {
     fetchSetores();
     fetchContratos();
     fetchItts();
+    fetchDocumentos();
   }, []);
 
   const fetchSetores = async () => {
@@ -47,6 +49,15 @@ const Relatorios = ({ userRole, userSector }) => {
     }
   };
 
+  const fetchDocumentos = async () => {
+    try {
+      const res = await axios.get('/api/documentos');
+      setDocumentos(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const getStatusBadgeClass = (status) => {
     if (status === 'VIGENTE') return 'badge-vigente';
     if (status === 'A_VENCER') return 'badge-a_vencer';
@@ -59,7 +70,7 @@ const Relatorios = ({ userRole, userSector }) => {
   };
 
   // Filtragem local baseada no Tipo
-  const dataSource = filtroTipo === 'CONTRATOS' ? contratos : itts;
+  const dataSource = filtroTipo === 'CONTRATOS' ? contratos : (filtroTipo === 'ITTS' ? itts : documentos);
 
   const dadosFiltrados = dataSource.filter((item) => {
     // Gestor can only see their sector
@@ -98,7 +109,9 @@ const Relatorios = ({ userRole, userSector }) => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #ccc', paddingBottom: '16px', marginBottom: '16px' }}>
           <img src="/logo.png" alt="Logo" style={{ maxHeight: '60px' }} />
           <div style={{ textAlign: 'right' }}>
-            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>Relatório de {filtroTipo === 'CONTRATOS' ? 'Contratos' : 'Instruções Técnicas (ITT)'}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>
+              Relatório de {filtroTipo === 'CONTRATOS' ? 'Contratos' : (filtroTipo === 'ITTS' ? 'Instruções Técnicas (ITT)' : 'CNDs & Documentos')}
+            </h2>
             <p style={{ margin: 0, color: '#666' }}>Emitido em: {new Date().toLocaleDateString('pt-BR')}</p>
           </div>
         </div>
@@ -133,6 +146,7 @@ const Relatorios = ({ userRole, userSector }) => {
             >
               <option value="CONTRATOS">Contratos</option>
               <option value="ITTS">Instruções Técnicas (ITT)</option>
+              <option value="DOCUMENTOS">CNDs & Documentos</option>
             </select>
           </div>
 
@@ -217,23 +231,31 @@ const Relatorios = ({ userRole, userSector }) => {
             <table>
               <thead>
                 <tr>
+                  {filtroTipo === 'DOCUMENTOS' && <th>Tipo</th>}
                   <th>{filtroTipo === 'CONTRATOS' ? 'Empresa' : 'Título'}</th>
                   <th>Setor</th>
                   {filtroTipo === 'CONTRATOS' && <th>Valor</th>}
-                  <th>{filtroTipo === 'CONTRATOS' ? 'Vencimento' : 'Revisão'}</th>
+                  <th>{filtroTipo === 'ITTS' ? 'Revisão' : 'Vencimento'}</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {dadosFiltrados.map((item) => (
                   <tr key={item.id}>
+                    {filtroTipo === 'DOCUMENTOS' && (
+                      <td>
+                        <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '0.8rem', fontWeight: 600 }}>
+                          {item.tipo}
+                        </span>
+                      </td>
+                    )}
                     <td style={{ fontWeight: 500 }}>{filtroTipo === 'CONTRATOS' ? item.empresa : item.titulo}</td>
                     <td>{item.setor?.nome}</td>
                     {filtroTipo === 'CONTRATOS' && <td>{item.valor ? `R$ ${item.valor}` : '-'}</td>}
                     <td>{item.data_vigencia_fim ? new Date(item.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
                     <td>
                       <span className={`badge ${getStatusBadgeClass(item.status)}`}>
-                        {item.status}
+                        {item.status === 'A_VENCER' ? 'A VENCER' : item.status}
                       </span>
                     </td>
                   </tr>
