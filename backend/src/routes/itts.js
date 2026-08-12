@@ -218,7 +218,8 @@ router.post('/:id/alert-manual', async (req, res) => {
       .replace(/{{setor}}/g, itt.setor.nome)
       .replace(/{{dias}}/g, diasAbs)
       .replace(/{{prazo_texto}}/g, prazoTexto)
-      .replace(/{{data_vencimento}}/g, dataFormatada);
+      .replace(/{{data_vencimento}}/g, dataFormatada)
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
 
     html = html
       .replace(/tem revisão\/vencimento em {{dias}} dias/gi, prazoTexto)
@@ -228,7 +229,8 @@ router.post('/:id/alert-manual', async (req, res) => {
       .replace(/{{setor}}/g, itt.setor.nome)
       .replace(/{{dias}}/g, diasAbs)
       .replace(/{{prazo_texto}}/g, prazoTexto)
-      .replace(/{{data_vencimento}}/g, dataFormatada);
+      .replace(/{{data_vencimento}}/g, dataFormatada)
+            .replace(/{{status_vencimento}}/g, diffDays >= 0 ? 'VENCERÁ' : 'VENCEU HÁ');
 
     const { success, error } = await sendEmail(uniqueEmails, subject, html);
 
