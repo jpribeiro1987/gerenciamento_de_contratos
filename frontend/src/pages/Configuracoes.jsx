@@ -309,7 +309,8 @@ const Configuracoes = () => {
             <code>{`{{empresa}}`}</code> : Nome da Empresa (ou Título, no caso de ITT)<br/>
             <code>{`{{setor}}`}</code> : Nome do Setor Responsável<br/>
             <code>{`{{dias}}`}</code> : Dias restantes para o vencimento<br/>
-            <code>{`{{data_vencimento}}`}</code> : Data de vigência formatada (ex: 31/12/2026)
+            <code>{`{{data_vencimento}}`}</code> : Data de vigência formatada (ex: 31/12/2026)<br/>
+            <code>{`{{status_vencimento}}`}</code> : "VENCERÁ" (se no prazo) ou "VENCEU HÁ" (se atrasado)
           </p>
         </div>
 
