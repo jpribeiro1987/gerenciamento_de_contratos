@@ -90,7 +90,8 @@ const Documentos = ({ userRole, userSector }) => {
           docs.push({
             id: `renovacao-${r.id}`,
             title: `Renovação - ${new Date(r.criado_em).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} (${r.descricao || 'Sem descrição'})`,
-            url: `/api/documentos/renovacoes/${r.id}/anexo`
+            url: `/api/documentos/renovacoes/${r.id}/anexo`,
+            isWord: r.anexos.includes('msword') || r.anexos.includes('wordprocessingml')
           });
         }
       });
@@ -99,7 +100,8 @@ const Documentos = ({ userRole, userSector }) => {
         docs.push({
           id: `original-${doc.id}`,
           title: 'Documento Original',
-          url: `/api/documentos/${doc.id}/anexo`
+          url: `/api/documentos/${doc.id}/anexo`,
+          isWord: doc.anexos.includes('msword') || doc.anexos.includes('wordprocessingml')
         });
       }
       

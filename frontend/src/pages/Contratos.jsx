@@ -89,7 +89,8 @@ const Contratos = ({ userRole, userSector }) => {
           docs.push({
             id: `aditivo-${ad.id}`,
             title: `Aditivo - ${new Date(ad.criado_em).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} (${ad.descricao || 'Sem descrição'})`,
-            url: `/api/contratos/aditivos/${ad.id}/anexo`
+            url: `/api/contratos/aditivos/${ad.id}/anexo`,
+            isWord: ad.anexos.includes('msword') || ad.anexos.includes('wordprocessingml')
           });
         }
       });
@@ -98,7 +99,8 @@ const Contratos = ({ userRole, userSector }) => {
         docs.push({
           id: `original-${c.id}`,
           title: 'Contrato Original',
-          url: `/api/contratos/${c.id}/anexo`
+          url: `/api/contratos/${c.id}/anexo`,
+          isWord: c.anexos.includes('msword') || c.anexos.includes('wordprocessingml')
         });
       }
       

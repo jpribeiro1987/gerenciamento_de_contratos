@@ -133,7 +133,7 @@ const ModalNovoDocumento = ({ onClose, onSave }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Anexar PDF do Documento</label>
-              <input type="file" name="pdf" accept="application/pdf" onChange={handleChange} style={inputStyle} />
+              <input type="file" name="pdf" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleChange} style={inputStyle} />
             </div>
           </div>
 

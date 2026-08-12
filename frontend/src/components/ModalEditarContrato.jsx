@@ -144,7 +144,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Substituir PDF Anexo</label>
-              <input type="file" name="pdf" accept="application/pdf" onChange={handleChange} style={inputStyle} />
+              <input type="file" name="pdf" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleChange} style={inputStyle} />
               {contrato.anexos && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
                   <a 
@@ -277,7 +277,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                 <label style={labelStyle}>Anexar PDF do Aditivo</label>
                 <input 
                   type="file" 
-                  accept="application/pdf"
+                  accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={e => setNovoAditivo({...novoAditivo, pdf: e.target.files[0]})} 
                   style={inputStyle} 
                   id="aditivoPdfInput"

@@ -70,7 +70,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
     
     let anexos = null;
     if (req.file) {
-      anexos = req.file.buffer.toString('base64');
+      anexos = req.file.mimetype + '|' + req.file.buffer.toString('base64');
     }
 
     const newContract = await prisma.contrato.create({
@@ -115,7 +115,7 @@ router.put('/:id', upload.single('pdf'), async (req, res) => {
     if (data.status !== undefined) updateData.status = data.status;
 
     if (req.file) {
-      updateData.anexos = req.file.buffer.toString('base64');
+      updateData.anexos = req.file.mimetype + '|' + req.file.buffer.toString('base64');
     }
 
     const updated = await prisma.contrato.update({
@@ -139,10 +139,22 @@ router.get('/:id/anexo', async (req, res) => {
       return res.status(404).json({ error: 'Anexo não encontrado' });
     }
 
-    const pdfBuffer = Buffer.from(contract.anexos, 'base64');
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="contrato_${id}.pdf"`);
-    res.send(pdfBuffer);
+    let mimeType = 'application/pdf';
+    let base64Data = contract.anexos;
+    let extension = 'pdf';
+
+    if (contract.anexos.includes('|')) {
+      const parts = contract.anexos.split('|');
+      mimeType = parts[0];
+      base64Data = parts[1];
+      if (mimeType.includes('msword')) extension = 'doc';
+      if (mimeType.includes('wordprocessingml')) extension = 'docx';
+    }
+
+    const fileBuffer = Buffer.from(base64Data, 'base64');
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="contrato_${id}.${extension}"`);
+    res.send(fileBuffer);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar anexo' });
   }
@@ -295,7 +307,7 @@ router.post('/:id/aditivos', upload.single('pdf'), async (req, res) => {
     
     let anexos = null;
     if (req.file) {
-      anexos = req.file.buffer.toString('base64');
+      anexos = req.file.mimetype + '|' + req.file.buffer.toString('base64');
     }
 
     const nova_data = new Date(data.nova_data_vigencia);
@@ -353,10 +365,22 @@ router.get('/aditivos/:idAditivo/anexo', async (req, res) => {
       return res.status(404).json({ error: 'Anexo não encontrado' });
     }
 
-    const pdfBuffer = Buffer.from(aditivo.anexos, 'base64');
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="aditivo_${idAditivo}.pdf"`);
-    res.send(pdfBuffer);
+    let mimeType = 'application/pdf';
+    let base64Data = aditivo.anexos;
+    let extension = 'pdf';
+
+    if (aditivo.anexos.includes('|')) {
+      const parts = aditivo.anexos.split('|');
+      mimeType = parts[0];
+      base64Data = parts[1];
+      if (mimeType.includes('msword')) extension = 'doc';
+      if (mimeType.includes('wordprocessingml')) extension = 'docx';
+    }
+
+    const fileBuffer = Buffer.from(base64Data, 'base64');
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="aditivo_${idAditivo}.${extension}"`);
+    res.send(fileBuffer);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar anexo' });
   }

@@ -89,7 +89,8 @@ const Itts = ({ userRole, userSector }) => {
           docs.push({
             id: `revisao-${r.id}`,
             title: `Revisão - ${new Date(r.criado_em).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} (${r.descricao || 'Sem descrição'})`,
-            url: `/api/itts/revisoes/${r.id}/anexo`
+            url: `/api/itts/revisoes/${r.id}/anexo`,
+            isWord: r.anexos.includes('msword') || r.anexos.includes('wordprocessingml')
           });
         }
       });
@@ -98,7 +99,8 @@ const Itts = ({ userRole, userSector }) => {
         docs.push({
           id: `original-${itt.id}`,
           title: 'ITT Original',
-          url: `/api/itts/${itt.id}/anexo`
+          url: `/api/itts/${itt.id}/anexo`,
+          isWord: itt.anexos.includes('msword') || itt.anexos.includes('wordprocessingml')
         });
       }
       

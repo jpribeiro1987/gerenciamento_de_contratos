@@ -59,11 +59,29 @@ const DocumentViewerModal = ({ title, documents, onClose }) => {
                 <Download size={16} /> Abrir nova guia
               </a>
             </div>
-            <iframe 
-              src={selectedDoc.url} 
-              style={{ width: '100%', height: '100%', border: 'none', background: '#333' }}
-              title={selectedDoc.title}
-            />
+            {selectedDoc.isWord ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
+                <FileText size={64} style={{ marginBottom: '16px', color: 'var(--primary)' }} />
+                <h3 style={{ marginBottom: '8px' }}>Documento do Word</h3>
+                <p style={{ marginBottom: '24px' }}>Este formato não pode ser visualizado diretamente no navegador.</p>
+                <a 
+                  href={selectedDoc.url}
+                  download
+                  style={{
+                    background: 'var(--primary)', color: '#fff', padding: '10px 24px', borderRadius: '8px',
+                    textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px'
+                  }}
+                >
+                  <Download size={18} /> Baixar Arquivo
+                </a>
+              </div>
+            ) : (
+              <iframe 
+                src={selectedDoc.url} 
+                style={{ width: '100%', height: '100%', border: 'none', background: '#333' }}
+                title={selectedDoc.title}
+              />
+            )}
           </div>
         </div>
       </div>

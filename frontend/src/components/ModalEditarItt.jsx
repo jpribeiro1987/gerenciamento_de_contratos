@@ -142,7 +142,7 @@ const ModalEditarItt = ({ itt, onClose, onSave }) => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Substituir PDF Anexo</label>
-              <input type="file" name="pdf" accept="application/pdf" onChange={handleChange} style={inputStyle} />
+              <input type="file" name="pdf" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleChange} style={inputStyle} />
               {itt.anexos && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
                   <a 
@@ -335,7 +335,7 @@ const ModalEditarItt = ({ itt, onClose, onSave }) => {
                 <label style={labelStyle}>Anexar PDF da Revisão</label>
                 <input 
                   type="file" 
-                  accept="application/pdf"
+                  accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={e => setNovaRevisao({...novaRevisao, pdf: e.target.files[0]})} 
                   style={inputStyle} 
                   id="revisaoPdfInput"
