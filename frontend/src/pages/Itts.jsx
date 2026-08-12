@@ -146,6 +146,13 @@ const Itts = ({ userRole, userSector }) => {
         )}
       </header>
 
+      <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '12px 16px', borderRadius: '8px', color: 'var(--text-main)', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+        <AlertCircle size={20} color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+        <div style={{ fontSize: '0.95rem' }}>
+          <strong>Regra de Alertas Automáticos:</strong> O sistema enviará notificações por e-mail aos responsáveis exatamente aos <strong>90, 60 e 30 dias</strong> antes da revisão/vencimento. Caso a ITT expire, um novo alerta será enviado a cada <strong>7 dias</strong> continuamente, até que a situação seja regularizada.
+        </div>
+      </div>
+
       <section className="glass-card" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
         <Search size={20} color="var(--text-muted)" />
         <input 
