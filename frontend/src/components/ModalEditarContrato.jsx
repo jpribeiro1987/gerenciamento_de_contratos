@@ -136,12 +136,24 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={labelStyle}>Status</label>
+              <select name="status" value={formData.status || 'VIGENTE'} onChange={handleChange} style={inputStyle}>
+                <option value="VIGENTE">Vigente</option>
+                <option value="EM_ANALISE">Em Análise</option>
+                <option value="A_VENCER">A Vencer</option>
+                <option value="VENCIDO">Vencido</option>
+                <option value="ENCERRADO">Encerrado</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', gridColumn: '2 / span 2' }}>
               <label style={labelStyle}>Observações</label>
               <textarea name="observacao" rows={3} value={formData.observacao} onChange={handleChange} style={{ ...inputStyle, resize: 'vertical' }} />
             </div>
+          </div>
 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Substituir PDF Anexo</label>
               <input type="file" name="pdf" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleChange} style={inputStyle} />

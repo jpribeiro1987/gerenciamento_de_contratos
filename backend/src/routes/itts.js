@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     today.setHours(0,0,0,0);
 
     const updatedItts = itts.map(itt => {
-      if (itt.status === 'CANCELADO' || itt.status === 'REVISADO') {
+      if (itt.status === 'CANCELADO' || itt.status === 'REVISADO' || itt.status === 'EM_ANALISE') {
         return itt;
       }
       

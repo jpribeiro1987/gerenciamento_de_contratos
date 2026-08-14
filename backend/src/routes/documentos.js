@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
     today.setHours(0,0,0,0);
 
     const updatedDocs = documentos.map(doc => {
-      if (doc.status === 'CANCELADO' || doc.status === 'RENOVADO') {
+      if (doc.status === 'CANCELADO' || doc.status === 'RENOVADO' || doc.status === 'EM_ANALISE') {
         return doc;
       }
       

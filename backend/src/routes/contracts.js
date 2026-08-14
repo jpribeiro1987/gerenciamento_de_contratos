@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     today.setHours(0,0,0,0);
 
     const updatedContracts = contracts.map(contract => {
-      if (contract.status === 'ENCERRADO' || contract.status === 'RENOVADO') {
+      if (contract.status === 'ENCERRADO' || contract.status === 'RENOVADO' || contract.status === 'EM_ANALISE') {
         return contract;
       }
       
