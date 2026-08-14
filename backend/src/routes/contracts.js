@@ -192,8 +192,8 @@ router.post('/:id/alert-manual', async (req, res) => {
     const emails = contract.setor.usuarios.map(u => u.email);
     const uniqueEmails = [...new Set(emails)].join(',');
 
-    const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT' } });
-    const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY' } });
+    const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_CONTRATO' } });
+    const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_CONTRATO' } });
 
     let subject = configSubject?.valor || `Alerta Manual de Contrato: {{empresa}}`;
     let html = configBody?.valor || `<p>Atenção ao contrato com a empresa <b>{{empresa}}</b> (Setor: {{setor}}).</p><p>Vencimento previsto para o dia {{data_vencimento}}.</p>`;

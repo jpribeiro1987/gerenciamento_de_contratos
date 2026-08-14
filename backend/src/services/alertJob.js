@@ -89,8 +89,8 @@ async function checkContractsAndAlert() {
           const uniqueEmails = [...new Set(emails)].join(',');
           
           // Get templates
-          const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT' } });
-          const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY' } });
+          const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_CONTRATO' } });
+          const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_CONTRATO' } });
 
           let subject = configSubject?.valor || `Alerta de Vencimento: Contrato {{empresa}}`;
           let html = configBody?.valor || `<p>O contrato com a empresa <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p><p>Por favor, providencie a renovação.</p>`;
@@ -210,8 +210,8 @@ async function checkIttsAndAlert() {
           const emails = itt.setor.usuarios.map(u => u.email);
           const uniqueEmails = [...new Set(emails)].join(',');
           
-          const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT' } });
-          const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY' } });
+          const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_ITT' } });
+          const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_ITT' } });
 
           let subject = configSubject?.valor || `Alerta de Vencimento: ITT {{empresa}}`;
           let html = configBody?.valor || `<p>A Instrução Técnica <b>{{empresa}}</b> (Setor: {{setor}}) tem revisão/vencimento em {{dias}} dias, no dia {{data_vencimento}}.</p><p>Por favor, providencie a revisão.</p>`;
@@ -317,8 +317,8 @@ async function checkDocumentosAndAlert() {
           const emails = doc.setor.usuarios.map(u => u.email);
           const uniqueEmails = [...new Set(emails)].join(',');
           
-          const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT' } });
-          const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY' } });
+          const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_DOC' } });
+          const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_DOC' } });
 
           let subject = configSubject?.valor || `Alerta de Vencimento: Documento {{empresa}}`;
           let html = configBody?.valor || `<p>O Documento <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p><p>Por favor, providencie a renovação.</p>`;

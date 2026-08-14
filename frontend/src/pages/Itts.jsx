@@ -19,7 +19,7 @@ const Itts = ({ userRole, userSector }) => {
 
   const fetchItts = async () => {
     try {
-      const url = userRole === 'ADMIN' 
+      const url = (userRole === 'ADMIN' || userRole === 'LEITURA') 
         ? '/api/itts' 
         : `/api/itts?setorId=${userSector}`;
       
@@ -50,6 +50,7 @@ const Itts = ({ userRole, userSector }) => {
       case 'VENCIDO': return <span className="badge badge-vencido"><AlertCircle size={12}/> Vencido</span>;
       case 'REVISADO': return <span className="badge badge-renovado"><CheckCircle size={12}/> Revisado</span>;
       case 'CANCELADO': return <span className="badge badge-vencido"><AlertCircle size={12}/> Cancelado</span>;
+      case 'EM_ANALISE': return <span className="badge" style={{ background: '#3b82f6', color: '#fff' }}>Em Análise</span>;
       default: return <span className="badge">{status}</span>;
     }
   };

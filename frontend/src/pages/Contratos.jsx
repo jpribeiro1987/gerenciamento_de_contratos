@@ -17,7 +17,7 @@ const Contratos = ({ userRole, userSector }) => {
 
   const fetchContracts = async () => {
     try {
-      const url = userRole === 'ADMIN' 
+      const url = (userRole === 'ADMIN' || userRole === 'LEITURA') 
         ? '/api/contratos' 
         : `/api/contratos?setorId=${userSector}`;
       
@@ -50,6 +50,7 @@ const Contratos = ({ userRole, userSector }) => {
       case 'VIGENTE': return <span className="badge badge-vigente"><CheckCircle size={12}/> Vigente</span>;
       case 'A_VENCER': return <span className="badge badge-a_vencer"><Clock size={12}/> A Vencer</span>;
       case 'VENCIDO': return <span className="badge badge-vencido"><AlertCircle size={12}/> Vencido</span>;
+      case 'EM_ANALISE': return <span className="badge" style={{ background: '#3b82f6', color: '#fff' }}>Em Análise</span>;
       default: return <span className="badge">{status}</span>;
     }
   };

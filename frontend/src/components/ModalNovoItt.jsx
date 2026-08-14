@@ -99,6 +99,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
               <label style={labelStyle}>Status</label>
               <select name="status" value={formData.status} onChange={handleChange} style={inputStyle}>
                 <option value="VIGENTE">Vigente</option>
+                <option value="EM_ANALISE">Em Análise</option>
                 <option value="A_VENCER">A Vencer</option>
                 <option value="VENCIDO">Vencido</option>
                 <option value="REVISADO">Revisado</option>

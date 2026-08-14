@@ -121,9 +121,9 @@ const Dashboard = ({ userRole, userSector }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const urlContratos = userRole === 'ADMIN' ? '/api/contratos' : `/api/contratos?setorId=${userSector}`;
-        const urlItts = userRole === 'ADMIN' ? '/api/itts' : `/api/itts?setorId=${userSector}`;
-        const urlDocs = userRole === 'ADMIN' ? '/api/documentos' : `/api/documentos?setorId=${userSector}`;
+        const urlContratos = (userRole === 'ADMIN' || userRole === 'LEITURA') ? '/api/contratos' : `/api/contratos?setorId=${userSector}`;
+        const urlItts = (userRole === 'ADMIN' || userRole === 'LEITURA') ? '/api/itts' : `/api/itts?setorId=${userSector}`;
+        const urlDocs = (userRole === 'ADMIN' || userRole === 'LEITURA') ? '/api/documentos' : `/api/documentos?setorId=${userSector}`;
         
         const [resContratos, resItts, resDocs] = await Promise.all([
           axios.get(urlContratos),
@@ -207,7 +207,7 @@ const Dashboard = ({ userRole, userSector }) => {
   const ittStatusData = getStatusData(itts);
 
   let sectorData = [];
-  if (userRole === 'ADMIN') {
+  if (userRole === 'ADMIN' || userRole === 'LEITURA') {
     const sectorMap = {};
     contracts.forEach(c => {
       const setorNome = c.setor?.nome || 'Sem Setor';
@@ -229,12 +229,12 @@ const Dashboard = ({ userRole, userSector }) => {
         <div>
           <h1 style={{ fontSize: '1.8rem', fontWeight: 600 }}>Visão Geral</h1>
           <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>
-            {userRole === 'ADMIN' ? 'Todos os setores, contratos e ITTs da organização.' : 'Contratos e ITTs do seu setor.'}
+            {userRole === 'ADMIN' || userRole === 'LEITURA' ? 'Todos os setores, contratos e ITTs da organização.' : 'Contratos e ITTs do seu setor.'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
-            {userRole === 'ADMIN' ? 'AD' : 'GS'}
+            {userRole === 'ADMIN' ? 'AD' : userRole === 'LEITURA' ? 'LT' : 'GS'}
           </div>
         </div>
       </header>
@@ -346,7 +346,7 @@ const Dashboard = ({ userRole, userSector }) => {
         </div>
 
         {/* Sector Cost Chart (Admin only) */}
-        {userRole === 'ADMIN' && (
+        {(userRole === 'ADMIN' || userRole === 'LEITURA') && (
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gridColumn: '1 / -1' }}>
             <div style={{ marginBottom: '16px', fontSize: '1.1rem', fontWeight: 600 }}>Maiores Custos por Setor (Contratos)</div>
             <div style={{ flex: 1, minHeight: '250px' }}>

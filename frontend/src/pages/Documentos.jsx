@@ -19,7 +19,7 @@ const Documentos = ({ userRole, userSector }) => {
 
   const fetchDocumentos = async () => {
     try {
-      const url = userRole === 'ADMIN' 
+      const url = (userRole === 'ADMIN' || userRole === 'LEITURA') 
         ? '/api/documentos' 
         : `/api/documentos?setorId=${userSector}`;
       
@@ -51,6 +51,7 @@ const Documentos = ({ userRole, userSector }) => {
       case 'VENCIDO': return <span className="badge badge-vencido"><AlertCircle size={12}/> Vencido</span>;
       case 'RENOVADO': return <span className="badge badge-renovado"><CheckCircle size={12}/> Renovado</span>;
       case 'CANCELADO': return <span className="badge badge-vencido"><AlertCircle size={12}/> Cancelado</span>;
+      case 'EM_ANALISE': return <span className="badge" style={{ background: '#3b82f6', color: '#fff' }}>Em Análise</span>;
       default: return <span className="badge">{status}</span>;
     }
   };

@@ -203,6 +203,7 @@ const SetoresUsuarios = () => {
                 <select name="perfil" value={userFormData.perfil} onChange={handleUserChange} style={inputStyle}>
                   <option value="GESTOR">Gestor de Setor</option>
                   <option value="ADMIN">Administrador (Acesso Total)</option>
+                  <option value="LEITURA">Somente Leitura (Global)</option>
                 </select>
               </div>
 
@@ -251,7 +252,7 @@ const SetoresUsuarios = () => {
                     </span>
                   </td>
                   <td style={{ padding: '12px', fontSize: '0.85rem' }}>
-                    {u.perfil === 'ADMIN' ? 'Todos' : u.setores.map(s => s.nome).join(', ')}
+                    {u.perfil === 'ADMIN' || u.perfil === 'LEITURA' ? 'Todos' : u.setores.map(s => s.nome).join(', ')}
                   </td>
                   <td style={{ padding: '12px', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                     <button onClick={() => handleEditUser(u)} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}>

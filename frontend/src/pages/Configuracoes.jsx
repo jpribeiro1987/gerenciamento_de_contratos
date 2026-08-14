@@ -4,8 +4,12 @@ import { Save, Mail, Server, Clock, Download, Upload } from 'lucide-react';
 
 const Configuracoes = () => {
   const [config, setConfig] = useState({
-    EMAIL_TEMPLATE_SUBJECT: '',
-    EMAIL_TEMPLATE_BODY: '',
+    EMAIL_TEMPLATE_SUBJECT_CONTRATO: '',
+    EMAIL_TEMPLATE_BODY_CONTRATO: '',
+    EMAIL_TEMPLATE_SUBJECT_ITT: '',
+    EMAIL_TEMPLATE_BODY_ITT: '',
+    EMAIL_TEMPLATE_SUBJECT_DOC: '',
+    EMAIL_TEMPLATE_BODY_DOC: '',
     ALERT_CRON_TIME: '06:00'
   });
   const [smtpConfig, setSmtpConfig] = useState({
@@ -33,8 +37,12 @@ const Configuracoes = () => {
     try {
       const res = await axios.get('/api/config');
       setConfig({
-        EMAIL_TEMPLATE_SUBJECT: res.data.EMAIL_TEMPLATE_SUBJECT || 'Alerta de Vencimento: Contrato {{empresa}}',
-        EMAIL_TEMPLATE_BODY: res.data.EMAIL_TEMPLATE_BODY || '<p>O contrato com a empresa <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p><p>Por favor, providencie a renovação.</p>',
+        EMAIL_TEMPLATE_SUBJECT_CONTRATO: res.data.EMAIL_TEMPLATE_SUBJECT_CONTRATO || 'Alerta de Vencimento: Contrato {{empresa}}',
+        EMAIL_TEMPLATE_BODY_CONTRATO: res.data.EMAIL_TEMPLATE_BODY_CONTRATO || '<p>O contrato com a empresa <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p>',
+        EMAIL_TEMPLATE_SUBJECT_ITT: res.data.EMAIL_TEMPLATE_SUBJECT_ITT || 'Alerta de Vencimento: ITT {{empresa}}',
+        EMAIL_TEMPLATE_BODY_ITT: res.data.EMAIL_TEMPLATE_BODY_ITT || '<p>A Instrução Técnica <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p>',
+        EMAIL_TEMPLATE_SUBJECT_DOC: res.data.EMAIL_TEMPLATE_SUBJECT_DOC || 'Alerta de Vencimento: Documento {{empresa}}',
+        EMAIL_TEMPLATE_BODY_DOC: res.data.EMAIL_TEMPLATE_BODY_DOC || '<p>O documento <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p>',
         ALERT_CRON_TIME: res.data.ALERT_CRON_TIME || '06:00'
       });
     } catch (err) {
@@ -66,7 +74,7 @@ const Configuracoes = () => {
     setLoading(true);
     try {
       await axios.put('/api/config', config);
-      alert('Template salvo com sucesso!');
+      alert('Configurações salvas com sucesso!');
     } catch (err) {
       console.error(err);
       alert('Erro ao salvar template.');
@@ -107,14 +115,13 @@ const Configuracoes = () => {
   const handleBackup = async () => {
     try {
       const response = await axios.get('/api/backup', {
-        responseType: 'blob' // Necessário para fazer o download de arquivos
+        responseType: 'blob'
       });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       
-      // Tenta pegar o nome do arquivo enviado pelo servidor, caso contrário usa um padrão
       const disposition = response.headers['content-disposition'];
       let filename = 'backup_contratos.zip';
       if (disposition && disposition.indexOf('attachment') !== -1) {
@@ -303,10 +310,10 @@ const Configuracoes = () => {
         <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '16px', borderRadius: '8px', marginBottom: '24px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
           <h4 style={{ margin: '0 0 8px 0', color: 'var(--primary)' }}>Variáveis Disponíveis</h4>
           <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-            Você pode utilizar as tags abaixo no Assunto ou no Corpo do e-mail. Elas serão substituídas pelos dados do contrato no momento do envio:
+            Você pode utilizar as tags abaixo no Assunto ou no Corpo do e-mail. Elas serão substituídas pelos dados do documento no momento do envio:
             <br/><br/>
-            <code>{`{{tipo}}`}</code> : Tipo do documento (Contrato ou Instrução Técnica)<br/>
-            <code>{`{{empresa}}`}</code> : Nome da Empresa (ou Título, no caso de ITT)<br/>
+            <code>{`{{tipo}}`}</code> : Tipo do documento (Contrato, ITT, etc)<br/>
+            <code>{`{{empresa}}`}</code> : Nome da Empresa (ou Título)<br/>
             <code>{`{{setor}}`}</code> : Nome do Setor Responsável<br/>
             <code>{`{{dias}}`}</code> : Dias restantes para o vencimento<br/>
             <code>{`{{data_vencimento}}`}</code> : Data de vigência formatada (ex: 31/12/2026)<br/>
@@ -314,7 +321,7 @@ const Configuracoes = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>
@@ -335,35 +342,112 @@ const Configuracoes = () => {
             <small style={{ color: 'var(--text-muted)' }}>Horário em que o sistema varrerá os contratos e enviará os alertas.</small>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', borderTop: '1px solid var(--panel-border)', paddingTop: '16px' }}>
-            <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Assunto do E-mail</label>
-            <input 
-              type="text" 
-              name="EMAIL_TEMPLATE_SUBJECT" 
-              value={config.EMAIL_TEMPLATE_SUBJECT} 
-              onChange={handleChange} 
-              required
-              style={{
-                background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
-                color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none'
-              }}
-            />
+          <hr style={{ border: 'none', borderTop: '1px solid var(--panel-border)' }} />
+
+          {/* CONTRATOS */}
+          <div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', color: 'var(--primary)' }}>Templates para Contratos</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+              <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Assunto do E-mail</label>
+              <input 
+                type="text" 
+                name="EMAIL_TEMPLATE_SUBJECT_CONTRATO" 
+                value={config.EMAIL_TEMPLATE_SUBJECT_CONTRATO} 
+                onChange={handleChange} 
+                required
+                style={{
+                  background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
+                  color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none'
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Corpo do E-mail (HTML permitido)</label>
+              <textarea 
+                name="EMAIL_TEMPLATE_BODY_CONTRATO" 
+                value={config.EMAIL_TEMPLATE_BODY_CONTRATO} 
+                onChange={handleChange} 
+                rows={4}
+                required
+                style={{
+                  background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
+                  color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none', resize: 'vertical',
+                  fontFamily: 'monospace', fontSize: '0.95rem'
+                }}
+              />
+            </div>
           </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Corpo do E-mail (HTML permitido)</label>
-            <textarea 
-              name="EMAIL_TEMPLATE_BODY" 
-              value={config.EMAIL_TEMPLATE_BODY} 
-              onChange={handleChange} 
-              rows={8}
-              required
-              style={{
-                background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
-                color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none', resize: 'vertical',
-                fontFamily: 'monospace', fontSize: '0.95rem'
-              }}
-            />
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--panel-border)' }} />
+
+          {/* ITTS */}
+          <div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', color: 'var(--primary)' }}>Templates para ITTs</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+              <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Assunto do E-mail</label>
+              <input 
+                type="text" 
+                name="EMAIL_TEMPLATE_SUBJECT_ITT" 
+                value={config.EMAIL_TEMPLATE_SUBJECT_ITT} 
+                onChange={handleChange} 
+                required
+                style={{
+                  background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
+                  color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none'
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Corpo do E-mail (HTML permitido)</label>
+              <textarea 
+                name="EMAIL_TEMPLATE_BODY_ITT" 
+                value={config.EMAIL_TEMPLATE_BODY_ITT} 
+                onChange={handleChange} 
+                rows={4}
+                required
+                style={{
+                  background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
+                  color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none', resize: 'vertical',
+                  fontFamily: 'monospace', fontSize: '0.95rem'
+                }}
+              />
+            </div>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--panel-border)' }} />
+
+          {/* DOCUMENTOS */}
+          <div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', color: 'var(--primary)' }}>Templates para Documentos e CNDs</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+              <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Assunto do E-mail</label>
+              <input 
+                type="text" 
+                name="EMAIL_TEMPLATE_SUBJECT_DOC" 
+                value={config.EMAIL_TEMPLATE_SUBJECT_DOC} 
+                onChange={handleChange} 
+                required
+                style={{
+                  background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
+                  color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none'
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Corpo do E-mail (HTML permitido)</label>
+              <textarea 
+                name="EMAIL_TEMPLATE_BODY_DOC" 
+                value={config.EMAIL_TEMPLATE_BODY_DOC} 
+                onChange={handleChange} 
+                rows={4}
+                required
+                style={{
+                  background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
+                  color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none', resize: 'vertical',
+                  fontFamily: 'monospace', fontSize: '0.95rem'
+                }}
+              />
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
