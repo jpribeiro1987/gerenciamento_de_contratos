@@ -45,9 +45,7 @@ const ModalNovoDocumento = ({ onClose, onSave }) => {
         }
       });
       
-      const res = await axios.post('/api/documentos', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.post('/api/documentos', payload);
       onSave(res.data);
       onClose();
     } catch (error) {

@@ -71,9 +71,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
         }
       });
       
-      const res = await axios.put(`/api/documentos/${documento.id}`, payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.put(`/api/documentos/${documento.id}`, payload);
       onSave(res.data);
       onClose();
     } catch (error) {
@@ -376,9 +374,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
                     payload.append('nova_data_vigencia', novaRenovacao.nova_data_vigencia);
                     if (novaRenovacao.pdf) payload.append('pdf', novaRenovacao.pdf);
 
-                    await axios.post(`/api/documentos/${documento.id}/renovacoes`, payload, {
-                      headers: { 'Content-Type': 'multipart/form-data' }
-                    });
+                    await axios.post(`/api/documentos/${documento.id}/renovacoes`, payload);
                     
                     setNovaRenovacao({ descricao: '', nova_data_vigencia: '', pdf: null });
                     document.getElementById('renovacaoPdfInput').value = '';

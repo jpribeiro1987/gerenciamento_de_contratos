@@ -156,9 +156,7 @@ const Configuracoes = () => {
     formData.append('backup', file);
 
     try {
-      const res = await axios.post('/api/backup/restore', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.post('/api/backup/restore', formData);
       alert(res.data.message || 'Backup restaurado com sucesso!');
       window.location.reload();
     } catch (err) {

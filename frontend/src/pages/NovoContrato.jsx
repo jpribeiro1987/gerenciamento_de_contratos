@@ -45,9 +45,7 @@ const NovoContrato = () => {
         }
       });
       
-      await axios.post('/api/contratos', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await axios.post('/api/contratos', payload);
       setSuccess(true);
       setFormData({
         empresa: '', setorId: '', valor: '', prazo_rescisao_dias: 30,

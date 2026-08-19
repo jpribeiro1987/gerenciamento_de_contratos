@@ -43,9 +43,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
         }
       });
       
-      const res = await axios.post('/api/itts', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.post('/api/itts', payload);
       onSave(res.data);
       onClose();
     } catch (error) {

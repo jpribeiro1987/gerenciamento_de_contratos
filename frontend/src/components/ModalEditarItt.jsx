@@ -71,9 +71,7 @@ const ModalEditarItt = ({ itt, onClose, onSave }) => {
         }
       });
       
-      const res = await axios.put(`/api/itts/${itt.id}`, payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.put(`/api/itts/${itt.id}`, payload);
       onSave(res.data);
       onClose();
     } catch (error) {
@@ -359,9 +357,7 @@ const ModalEditarItt = ({ itt, onClose, onSave }) => {
                     payload.append('nova_data_vigencia', novaRevisao.nova_data_vigencia);
                     if (novaRevisao.pdf) payload.append('pdf', novaRevisao.pdf);
 
-                    await axios.post(`/api/itts/${itt.id}/revisoes`, payload, {
-                      headers: { 'Content-Type': 'multipart/form-data' }
-                    });
+                    await axios.post(`/api/itts/${itt.id}/revisoes`, payload);
                     
                     setNovaRevisao({ descricao: '', nova_data_vigencia: '', pdf: null });
                     document.getElementById('revisaoPdfInput').value = '';

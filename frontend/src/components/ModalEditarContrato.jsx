@@ -71,9 +71,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
         }
       });
       
-      const res = await axios.put(`/api/contratos/${contrato.id}`, payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.put(`/api/contratos/${contrato.id}`, payload);
       onSave(res.data);
       onClose();
     } catch (error) {
@@ -313,9 +311,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                     if (novoAditivo.novo_valor) payload.append('novo_valor', novoAditivo.novo_valor);
                     if (novoAditivo.pdf) payload.append('pdf', novoAditivo.pdf);
 
-                    await axios.post(`/api/contratos/${contrato.id}/aditivos`, payload, {
-                      headers: { 'Content-Type': 'multipart/form-data' }
-                    });
+                    await axios.post(`/api/contratos/${contrato.id}/aditivos`, payload);
                     
                     setNovoAditivo({ descricao: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
                     document.getElementById('aditivoPdfInput').value = '';
