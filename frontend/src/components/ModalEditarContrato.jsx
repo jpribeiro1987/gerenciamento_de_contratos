@@ -65,6 +65,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
     try {
       const payload = new FormData();
       Object.keys(formData).forEach(key => {
+        if (key === 'anexos') return; // Do not send back the base64 string
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
           payload.append(key, formData[key]);
         }
