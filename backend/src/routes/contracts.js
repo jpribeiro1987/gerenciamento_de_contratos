@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 // Configuração do Multer para armazenamento em memória (para converter em Base64)
 const upload = multer({ 
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // Limite de 10MB
+  limits: { fileSize: 20 * 1024 * 1024, fieldSize: 20 * 1024 * 1024 } // Limite de 20MB
 });
 
 // Get all contracts
