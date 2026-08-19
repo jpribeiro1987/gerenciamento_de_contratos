@@ -67,7 +67,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
       Object.keys(formData).forEach(key => {
         if (key === 'anexos') return; // Do not send back the base64 string
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-          payload.append(key, formData[key]);
+          if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) { const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, ''); payload.append(key, formData[key], safeName); } else { payload.append(key, formData[key]); }
         }
       });
       
@@ -309,7 +309,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                     payload.append('descricao', novoAditivo.descricao);
                     payload.append('nova_data_vigencia', novoAditivo.nova_data_vigencia);
                     if (novoAditivo.novo_valor) payload.append('novo_valor', novoAditivo.novo_valor);
-                    if (novoAditivo.pdf) payload.append('pdf', novoAditivo.pdf);
+                    if (novoAditivo.pdf) { const safeName = novoAditivo.pdf.name.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9.\\-_ ]/g, ''); payload.append('pdf', novoAditivo.pdf, safeName); }
 
                     await axios.post(`/api/contratos/${contrato.id}/aditivos`, payload);
                     

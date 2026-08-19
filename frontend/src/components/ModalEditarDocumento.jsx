@@ -67,7 +67,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
       Object.keys(formData).forEach(key => {
         if (key === 'anexos') return; // Do not send back the base64 string
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-          payload.append(key, formData[key]);
+          if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) { const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, ''); payload.append(key, formData[key], safeName); } else { payload.append(key, formData[key]); }
         }
       });
       
@@ -372,7 +372,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
                     const payload = new FormData();
                     payload.append('descricao', novaRenovacao.descricao);
                     payload.append('nova_data_vigencia', novaRenovacao.nova_data_vigencia);
-                    if (novaRenovacao.pdf) payload.append('pdf', novaRenovacao.pdf);
+                    if (novaRenovacao.pdf) { const safeName = novaRenovacao.pdf.name.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9.\\-_ ]/g, ''); payload.append('pdf', novaRenovacao.pdf, safeName); }
 
                     await axios.post(`/api/documentos/${documento.id}/renovacoes`, payload);
                     

@@ -41,7 +41,7 @@ const NovoContrato = () => {
       const payload = new FormData();
       Object.keys(formData).forEach(key => {
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-          payload.append(key, formData[key]);
+          if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) { const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, ''); payload.append(key, formData[key], safeName); } else { payload.append(key, formData[key]); }
         }
       });
       

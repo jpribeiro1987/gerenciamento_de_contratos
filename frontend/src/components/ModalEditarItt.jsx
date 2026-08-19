@@ -67,7 +67,7 @@ const ModalEditarItt = ({ itt, onClose, onSave }) => {
       Object.keys(formData).forEach(key => {
         if (key === 'anexos') return; // Do not send back the base64 string
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-          payload.append(key, formData[key]);
+          if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) { const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, ''); payload.append(key, formData[key], safeName); } else { payload.append(key, formData[key]); }
         }
       });
       
@@ -355,7 +355,7 @@ const ModalEditarItt = ({ itt, onClose, onSave }) => {
                     const payload = new FormData();
                     payload.append('descricao', novaRevisao.descricao);
                     payload.append('nova_data_vigencia', novaRevisao.nova_data_vigencia);
-                    if (novaRevisao.pdf) payload.append('pdf', novaRevisao.pdf);
+                    if (novaRevisao.pdf) { const safeName = novaRevisao.pdf.name.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9.\\-_ ]/g, ''); payload.append('pdf', novaRevisao.pdf, safeName); }
 
                     await axios.post(`/api/itts/${itt.id}/revisoes`, payload);
                     
