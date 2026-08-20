@@ -56,6 +56,7 @@ model Aditivo {
   contratoId         Int
   contrato           Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
   descricao          String?
+  data_assinatura    DateTime?
   nova_data_vigencia DateTime
   novo_valor         Float?
   anexos             String?

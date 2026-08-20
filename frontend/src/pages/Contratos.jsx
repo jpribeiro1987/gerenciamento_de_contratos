@@ -171,7 +171,7 @@ const Contratos = ({ userRole, userSector }) => {
                 <td>
                   {c.aditivos && c.aditivos.length > 0 ? (
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                      Sim ({new Date(c.aditivos[0].criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })})
+                      Sim ({new Date(c.aditivos[0].data_assinatura || c.aditivos[0].criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })})
                     </span>
                   ) : (
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Não</span>

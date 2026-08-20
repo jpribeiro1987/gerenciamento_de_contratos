@@ -7,7 +7,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
   const [formData, setFormData] = useState({ ...contrato });
   const [loading, setLoading] = useState(false);
   const [aditivos, setAditivos] = useState([]);
-  const [novoAditivo, setNovoAditivo] = useState({ descricao: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
+  const [novoAditivo, setNovoAditivo] = useState({ descricao: '', data_assinatura: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
   const [loadingAditivo, setLoadingAditivo] = useState(false);
 
   useEffect(() => {
@@ -211,7 +211,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div style={{ fontWeight: 600 }}>{a.descricao || 'Sem descrição'}</div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Registrado em: {new Date(a.criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                    Assinado em: {new Date(a.data_assinatura || a.criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -252,7 +252,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
           {/* Form Novo Aditivo */}
           <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
             <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem' }}>Registrar Novo Aditivo</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={labelStyle}>Descrição *</label>
                 <input 
@@ -261,6 +261,15 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                   onChange={e => setNovoAditivo({...novoAditivo, descricao: e.target.value})} 
                   style={inputStyle} 
                   placeholder="Ex: Prorrogação 2026"
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={labelStyle}>Data Assinatura *</label>
+                <input 
+                  type="date" 
+                  value={novoAditivo.data_assinatura} 
+                  onChange={e => setNovoAditivo({...novoAditivo, data_assinatura: e.target.value})} 
+                  style={inputStyle} 
                 />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -299,8 +308,8 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button 
                 onClick={async () => {
-                  if (!novoAditivo.descricao || !novoAditivo.nova_data_vigencia) {
-                    alert('Preencha a descrição e a nova data de vigência.');
+                  if (!novoAditivo.descricao || !novoAditivo.nova_data_vigencia || !novoAditivo.data_assinatura) {
+                    alert('Preencha a descrição, a data de assinatura e a nova data de vigência.');
                     return;
                   }
                   setLoadingAditivo(true);
@@ -308,12 +317,13 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                     const payload = new FormData();
                     payload.append('descricao', novoAditivo.descricao);
                     payload.append('nova_data_vigencia', novoAditivo.nova_data_vigencia);
+                    payload.append('data_assinatura', novoAditivo.data_assinatura);
                     if (novoAditivo.novo_valor) payload.append('novo_valor', novoAditivo.novo_valor);
                     if (novoAditivo.pdf) { const safeName = novoAditivo.pdf.name.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9.\\-_ ]/g, ''); payload.append('pdf', novoAditivo.pdf, safeName); }
 
                     await axios.post(`/api/contratos/${contrato.id}/aditivos`, payload);
                     
-                    setNovoAditivo({ descricao: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
+                    setNovoAditivo({ descricao: '', data_assinatura: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
                     document.getElementById('aditivoPdfInput').value = '';
                     fetchAditivos();
                     

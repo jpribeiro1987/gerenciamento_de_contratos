@@ -313,6 +313,7 @@ router.post('/:id/aditivos', upload.single('pdf'), async (req, res) => {
     }
 
     const nova_data = new Date(data.nova_data_vigencia);
+    const data_assinatura = data.data_assinatura ? new Date(data.data_assinatura) : null;
     const novo_valor = data.novo_valor ? parseFloat(data.novo_valor) : null;
 
     // Create aditivo
@@ -320,6 +321,7 @@ router.post('/:id/aditivos', upload.single('pdf'), async (req, res) => {
       data: {
         contratoId: parseInt(id),
         descricao: data.descricao,
+        data_assinatura: data_assinatura,
         nova_data_vigencia: nova_data,
         novo_valor: novo_valor,
         anexos: anexos
