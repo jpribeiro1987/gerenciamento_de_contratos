@@ -247,7 +247,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                     <Trash2 size={16} />
                   </button>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingRight: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingRight: '60px' }}>
                   <div style={{ fontWeight: 600 }}>{a.descricao || 'Sem descrição'}</div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                     Assinado em: {new Date(a.data_assinatura || a.criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
