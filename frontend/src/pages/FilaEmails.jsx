@@ -93,7 +93,7 @@ const FilaEmails = ({ userRole }) => {
           <thead>
             <tr>
               <th>Data de Envio</th>
-              <th>Contrato (Empresa)</th>
+              <th>Item Enviado</th>
               <th>Destinatários</th>
               <th>Status</th>
               <th>Erro (se houver)</th>
@@ -108,7 +108,10 @@ const FilaEmails = ({ userRole }) => {
                     <div style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '4px' }}>Disparo Manual</div>
                   )}
                 </td>
-                <td style={{ fontWeight: 500 }}>{a.contrato?.empresa || `ID: ${a.contratoId}`}</td>
+                <td style={{ fontWeight: 500 }}>
+                  {a.nome}
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{a.tipo}</div>
+                </td>
                 <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={a.destinatarios}>
                   {a.destinatarios}
                 </td>
