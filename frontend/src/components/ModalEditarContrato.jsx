@@ -45,6 +45,19 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
     }
   };
 
+  const handleDeleteAditivo = async (aditivoId) => {
+    if (window.confirm('Tem certeza que deseja excluir este aditivo?')) {
+      try {
+        await axios.delete(`/api/contratos/${contrato.id}/aditivos/${aditivoId}`);
+        fetchAditivos();
+        onSave(); // atualiza a lista pai
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao excluir aditivo');
+      }
+    }
+  };
+
   if (!contrato) return null;
 
   const handleChange = (e) => {
@@ -207,8 +220,15 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
               <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Nenhum aditivo registrado.</div>
             )}
             {aditivos.map(a => (
-              <div key={a.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div key={a.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: '1px solid var(--panel-border)', position: 'relative' }}>
+                <button 
+                  onClick={() => handleDeleteAditivo(a.id)}
+                  style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
+                  title="Excluir aditivo"
+                >
+                  <Trash2 size={16} />
+                </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingRight: '24px' }}>
                   <div style={{ fontWeight: 600 }}>{a.descricao || 'Sem descrição'}</div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                     Assinado em: {new Date(a.data_assinatura || a.criado_em).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}

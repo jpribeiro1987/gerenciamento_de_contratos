@@ -404,4 +404,59 @@ router.delete('/aditivos/:idAditivo/anexo', async (req, res) => {
   }
 });
 
+// Delete aditivo
+router.delete('/:id/aditivos/:aditivoId', async (req, res) => {
+  try {
+    const { id, aditivoId } = req.params;
+    
+    // Deleta o aditivo
+    await prisma.aditivo.delete({
+      where: { id: parseInt(aditivoId) }
+    });
+
+    // Busca o ultimo aditivo restante para tentar reverter a data/valor
+    const ultimoAditivo = await prisma.aditivo.findFirst({
+      where: { contratoId: parseInt(id) },
+      orderBy: { criado_em: 'desc' }
+    });
+
+    const contrato = await prisma.contrato.findUnique({ where: { id: parseInt(id) } });
+    if (contrato) {
+      const updateData = {};
+      if (ultimoAditivo) {
+        updateData.data_vigencia_fim = ultimoAditivo.nova_data_vigencia;
+        if (ultimoAditivo.novo_valor) updateData.valor = ultimoAditivo.novo_valor;
+      }
+      
+      if (Object.keys(updateData).length > 0) {
+        // Recalcular status baseado na nova data
+        if (updateData.data_vigencia_fim) {
+          const diffTime = updateData.data_vigencia_fim - new Date();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const contratoAtual = await prisma.contrato.findUnique({ where: { id: parseInt(id) } });
+          
+          if (!['ENCERRADO', 'CANCELADO', 'RENOVADO'].includes(contratoAtual.status)) {
+             if (diffDays <= contratoAtual.dias_alerta && diffDays >= 0) {
+               updateData.status = 'A_VENCER';
+             } else if (diffDays < 0) {
+               updateData.status = 'VENCIDO';
+             } else {
+               updateData.status = 'VIGENTE';
+             }
+          }
+        }
+        await prisma.contrato.update({
+          where: { id: parseInt(id) },
+          data: updateData
+        });
+      }
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao excluir aditivo' });
+  }
+});
+
 module.exports = router;
