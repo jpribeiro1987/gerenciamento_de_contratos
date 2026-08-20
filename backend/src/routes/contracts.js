@@ -459,4 +459,80 @@ router.delete('/:id/aditivos/:aditivoId', async (req, res) => {
   }
 });
 
+// Edit aditivo
+router.put('/:id/aditivos/:aditivoId', upload.single('pdf'), async (req, res) => {
+  try {
+    const { id, aditivoId } = req.params;
+    const data = req.body;
+    
+    let anexos = undefined;
+    if (req.file) {
+      anexos = req.file.mimetype + '|' + req.file.buffer.toString('base64');
+    }
+
+    const nova_data = new Date(data.nova_data_vigencia);
+    const data_assinatura = data.data_assinatura ? new Date(data.data_assinatura) : null;
+    const novo_valor = data.novo_valor ? parseFloat(data.novo_valor) : null;
+
+    const updateDataAditivo = {
+      descricao: data.descricao,
+      data_assinatura: data_assinatura,
+      nova_data_vigencia: nova_data,
+      novo_valor: novo_valor
+    };
+    if (anexos !== undefined) updateDataAditivo.anexos = anexos;
+
+    // Atualiza o aditivo
+    await prisma.aditivo.update({
+      where: { id: parseInt(aditivoId) },
+      data: updateDataAditivo
+    });
+
+    // Busca o ultimo aditivo restante para tentar reverter/atualizar a data/valor do contrato
+    const ultimoAditivo = await prisma.aditivo.findFirst({
+      where: { contratoId: parseInt(id) },
+      orderBy: { criado_em: 'desc' }
+    });
+
+    const contrato = await prisma.contrato.findUnique({ where: { id: parseInt(id) } });
+    if (contrato) {
+      const updateData = {};
+      if (ultimoAditivo) {
+        updateData.data_vigencia_fim = ultimoAditivo.nova_data_vigencia;
+        if (ultimoAditivo.id === parseInt(aditivoId) && novo_valor !== null) {
+            updateData.valor = novo_valor;
+        } else if (ultimoAditivo.id !== parseInt(aditivoId)) {
+            if (ultimoAditivo.novo_valor !== null) updateData.valor = ultimoAditivo.novo_valor;
+        }
+      }
+      
+      if (Object.keys(updateData).length > 0) {
+        if (updateData.data_vigencia_fim) {
+          const diffTime = updateData.data_vigencia_fim - new Date();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (!['ENCERRADO', 'CANCELADO', 'RENOVADO'].includes(contrato.status)) {
+             if (diffDays <= contrato.dias_alerta && diffDays >= 0) {
+               updateData.status = 'A_VENCER';
+             } else if (diffDays < 0) {
+               updateData.status = 'VENCIDO';
+             } else {
+               updateData.status = 'VIGENTE';
+             }
+          }
+        }
+        await prisma.contrato.update({
+          where: { id: parseInt(id) },
+          data: updateData
+        });
+      }
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao editar aditivo' });
+  }
+});
+
 module.exports = router;

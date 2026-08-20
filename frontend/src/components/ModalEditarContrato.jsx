@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { X, Save, FileText, Plus, Trash2 } from 'lucide-react';
+import { X, Save, FileText, Plus, Trash2, Edit } from 'lucide-react';
 
 const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
   const [setores, setSetores] = useState([]);
@@ -8,6 +8,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
   const [loading, setLoading] = useState(false);
   const [aditivos, setAditivos] = useState([]);
   const [novoAditivo, setNovoAditivo] = useState({ descricao: '', data_assinatura: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
+  const [editingAditivoId, setEditingAditivoId] = useState(null);
   const [loadingAditivo, setLoadingAditivo] = useState(false);
 
   useEffect(() => {
@@ -221,13 +222,31 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             )}
             {aditivos.map(a => (
               <div key={a.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: '1px solid var(--panel-border)', position: 'relative' }}>
-                <button 
-                  onClick={() => handleDeleteAditivo(a.id)}
-                  style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
-                  title="Excluir aditivo"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px' }}>
+                  <button 
+                    onClick={() => {
+                      setEditingAditivoId(a.id);
+                      setNovoAditivo({
+                        descricao: a.descricao || '',
+                        data_assinatura: a.data_assinatura ? new Date(a.data_assinatura).toISOString().split('T')[0] : '',
+                        nova_data_vigencia: new Date(a.nova_data_vigencia).toISOString().split('T')[0],
+                        novo_valor: a.novo_valor || '',
+                        pdf: null
+                      });
+                    }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '4px' }}
+                    title="Editar aditivo"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteAditivo(a.id)}
+                    style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
+                    title="Excluir aditivo"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingRight: '24px' }}>
                   <div style={{ fontWeight: 600 }}>{a.descricao || 'Sem descrição'}</div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
@@ -269,9 +288,22 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             ))}
           </div>
 
-          {/* Form Novo Aditivo */}
+          {/* Form Novo/Editar Aditivo */}
           <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
-            <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem' }}>Registrar Novo Aditivo</h4>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', display: 'flex', justifyContent: 'space-between' }}>
+              {editingAditivoId ? 'Editar Aditivo' : 'Registrar Novo Aditivo'}
+              {editingAditivoId && (
+                <button 
+                  onClick={() => {
+                    setEditingAditivoId(null);
+                    setNovoAditivo({ descricao: '', data_assinatura: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
+                  }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem' }}
+                >
+                  Cancelar Edição
+                </button>
+              )}
+            </h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={labelStyle}>Descrição *</label>
@@ -341,7 +373,12 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                     if (novoAditivo.novo_valor) payload.append('novo_valor', novoAditivo.novo_valor);
                     if (novoAditivo.pdf) { const safeName = novoAditivo.pdf.name.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9.\\-_ ]/g, ''); payload.append('pdf', novoAditivo.pdf, safeName); }
 
-                    await axios.post(`/api/contratos/${contrato.id}/aditivos`, payload);
+                    if (editingAditivoId) {
+                      await axios.put(`/api/contratos/${contrato.id}/aditivos/${editingAditivoId}`, payload);
+                      setEditingAditivoId(null);
+                    } else {
+                      await axios.post(`/api/contratos/${contrato.id}/aditivos`, payload);
+                    }
                     
                     setNovoAditivo({ descricao: '', data_assinatura: '', nova_data_vigencia: '', novo_valor: '', pdf: null });
                     document.getElementById('aditivoPdfInput').value = '';
@@ -357,9 +394,10 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                   }
                 }} 
                 disabled={loadingAditivo} 
-                style={{...saveBtnStyle, background: 'var(--success)'}}
+                style={{ ...saveBtnStyle, background: 'var(--success)', opacity: loadingAditivo ? 0.7 : 1 }}
               >
-                {loadingAditivo ? 'Adicionando...' : <><Plus size={18}/> Adicionar Aditivo</>}
+                <Plus size={18} />
+                {loadingAditivo ? 'Salvando...' : editingAditivoId ? 'Salvar Alterações' : 'Adicionar Aditivo'}
               </button>
             </div>
           </div>
