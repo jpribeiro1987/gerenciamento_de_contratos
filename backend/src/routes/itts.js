@@ -49,6 +49,24 @@ router.get('/', async (req, res) => {
       orderBy: { data_vigencia_fim: 'asc' }
     });
 
+    const ittsAnexos = await prisma.$queryRaw`SELECT id, SUBSTR(anexos, 1, 50) as mime FROM Itt WHERE anexos IS NOT NULL`;
+    const revisoesAnexos = await prisma.$queryRaw`SELECT id, SUBSTR(anexos, 1, 50) as mime FROM RevisaoItt WHERE anexos IS NOT NULL`;
+
+    const mapItts = {};
+    for (const row of ittsAnexos) mapItts[row.id] = row.mime;
+
+    const mapRevisoes = {};
+    for (const row of revisoesAnexos) mapRevisoes[row.id] = row.mime;
+
+    itts.forEach(i => {
+      if (mapItts[i.id]) i.anexos = mapItts[i.id];
+      if (i.revisoes && i.revisoes.length > 0) {
+        i.revisoes.forEach(r => {
+          if (mapRevisoes[r.id]) r.anexos = mapRevisoes[r.id];
+        });
+      }
+    });
+
     // Calcular o status dinamicamente baseado na data de hoje
     const today = new Date();
     today.setHours(0,0,0,0);

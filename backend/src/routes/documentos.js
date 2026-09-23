@@ -50,6 +50,24 @@ router.get('/', async (req, res) => {
       orderBy: { data_vigencia_fim: 'asc' }
     });
 
+    const documentosAnexos = await prisma.$queryRaw`SELECT id, SUBSTR(anexos, 1, 50) as mime FROM Documento WHERE anexos IS NOT NULL`;
+    const renovacoesAnexos = await prisma.$queryRaw`SELECT id, SUBSTR(anexos, 1, 50) as mime FROM RenovacaoDocumento WHERE anexos IS NOT NULL`;
+
+    const mapDocumentos = {};
+    for (const row of documentosAnexos) mapDocumentos[row.id] = row.mime;
+
+    const mapRenovacoes = {};
+    for (const row of renovacoesAnexos) mapRenovacoes[row.id] = row.mime;
+
+    documentos.forEach(d => {
+      if (mapDocumentos[d.id]) d.anexos = mapDocumentos[d.id];
+      if (d.renovacoes && d.renovacoes.length > 0) {
+        d.renovacoes.forEach(r => {
+          if (mapRenovacoes[r.id]) r.anexos = mapRenovacoes[r.id];
+        });
+      }
+    });
+
     const today = new Date();
     today.setHours(0,0,0,0);
 

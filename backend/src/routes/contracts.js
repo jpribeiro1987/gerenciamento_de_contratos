@@ -56,6 +56,24 @@ router.get('/', async (req, res) => {
       orderBy: { data_vigencia_fim: 'asc' }
     });
 
+    const contratosAnexos = await prisma.$queryRaw`SELECT id, SUBSTR(anexos, 1, 50) as mime FROM Contrato WHERE anexos IS NOT NULL`;
+    const aditivosAnexos = await prisma.$queryRaw`SELECT id, SUBSTR(anexos, 1, 50) as mime FROM Aditivo WHERE anexos IS NOT NULL`;
+
+    const mapContratos = {};
+    for (const row of contratosAnexos) mapContratos[row.id] = row.mime;
+
+    const mapAditivos = {};
+    for (const row of aditivosAnexos) mapAditivos[row.id] = row.mime;
+
+    contracts.forEach(c => {
+      if (mapContratos[c.id]) c.anexos = mapContratos[c.id];
+      if (c.aditivos && c.aditivos.length > 0) {
+        c.aditivos.forEach(ad => {
+          if (mapAditivos[ad.id]) ad.anexos = mapAditivos[ad.id];
+        });
+      }
+    });
+
     // Calcular o status dinamicamente baseado na data de hoje
     const today = new Date();
     today.setHours(0,0,0,0);
