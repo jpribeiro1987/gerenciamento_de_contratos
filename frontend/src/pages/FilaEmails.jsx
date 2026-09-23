@@ -101,7 +101,7 @@ const FilaEmails = ({ userRole }) => {
           </thead>
           <tbody>
             {alertas.map(a => (
-              <tr key={a.id}>
+              <tr key={a.tipo + '-' + a.id}>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   {new Date(a.data_envio).toLocaleString('pt-BR')}
                   {a.status_envio.includes('MANUAL') && (

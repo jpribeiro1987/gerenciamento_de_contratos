@@ -8,13 +8,13 @@ const prisma = new PrismaClient();
 router.get('/', async (req, res) => {
   try {
     const historicoContratos = await prisma.historicoAlerta.findMany({
-      include: { contrato: true },
+      include: { contrato: { select: { empresa: true } } },
     });
     const historicoItts = await prisma.historicoAlertaItt.findMany({
-      include: { itt: true },
+      include: { itt: { select: { titulo: true } } },
     });
     const historicoDocumentos = await prisma.historicoAlertaDocumento.findMany({
-      include: { documento: true },
+      include: { documento: { select: { titulo: true } } },
     });
 
     const unified = [
@@ -27,6 +27,7 @@ router.get('/', async (req, res) => {
 
     res.json(unified);
   } catch (error) {
+    console.error("Erro no alertas:", error);
     res.status(500).json({ error: 'Erro ao buscar histórico de e-mails' });
   }
 });

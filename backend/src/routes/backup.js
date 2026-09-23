@@ -59,7 +59,7 @@ const AdmZip = require('adm-zip');
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 } // 50MB
+  limits: { fileSize: 5 * 1024 * 1024 * 1024, fieldSize: 5 * 1024 * 1024 * 1024 } // 5GB
 });
 
 router.post('/restore', upload.single('backup'), async (req, res) => {
