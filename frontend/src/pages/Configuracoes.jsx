@@ -112,31 +112,11 @@ const Configuracoes = () => {
     }
   };
 
-  const handleBackup = async () => {
+  const handleBackup = () => {
     try {
-      const response = await axios.get('/api/backup', {
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      
-      const disposition = response.headers['content-disposition'];
-      let filename = 'backup_contratos.zip';
-      if (disposition && disposition.indexOf('attachment') !== -1) {
-        const matches = /filename="([^"]+)"/.exec(disposition);
-        if (matches != null && matches[1]) {
-          filename = matches[1];
-        }
-      }
-
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.location.href = '/api/backup';
     } catch (err) {
-      alert('Erro ao tentar baixar o backup.');
+      alert('Erro ao tentar iniciar o download do backup.');
       console.error(err);
     }
   };
