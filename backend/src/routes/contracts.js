@@ -21,11 +21,36 @@ router.get('/', async (req, res) => {
     
     const contracts = await prisma.contrato.findMany({
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        empresa: true,
+        setorId: true,
+        prazo_rescisao_dias: true,
+        valor: true,
+        valor_tipo: true,
+        valor_observacao: true,
+        data_contratacao: true,
+        data_vigencia_fim: true,
+        renovacao_automatica: true,
+        dias_alerta: true,
+        status: true,
+        observacao: true,
+        criado_por: true,
+        atualizado_em: true,
+        criado_em: true,
         setor: true,
         aditivos: {
           orderBy: { criado_em: 'desc' },
-          take: 1
+          take: 1,
+          select: {
+            id: true,
+            contratoId: true,
+            descricao: true,
+            data_assinatura: true,
+            nova_data_vigencia: true,
+            novo_valor: true,
+            criado_em: true
+          }
         }
       },
       orderBy: { data_vigencia_fim: 'asc' }

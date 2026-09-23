@@ -21,11 +21,29 @@ router.get('/', async (req, res) => {
     
     const itts = await prisma.itt.findMany({
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        titulo: true,
+        setorId: true,
+        data_emissao: true,
+        data_vigencia_fim: true,
+        dias_alerta: true,
+        status: true,
+        observacao: true,
+        criado_por: true,
+        atualizado_em: true,
+        criado_em: true,
         setor: true,
         revisoes: {
           orderBy: { criado_em: 'desc' },
-          take: 1
+          take: 1,
+          select: {
+            id: true,
+            ittId: true,
+            descricao: true,
+            nova_data_vigencia: true,
+            criado_em: true
+          }
         }
       },
       orderBy: { data_vigencia_fim: 'asc' }
