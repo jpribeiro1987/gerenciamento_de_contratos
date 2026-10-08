@@ -11,6 +11,15 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
   const [editingAditivoId, setEditingAditivoId] = useState(null);
   const [loadingAditivo, setLoadingAditivo] = useState(false);
 
+  const [unidadesMedida, setUnidadesMedida] = useState(['Valor Mensal', 'Valor Semestral', 'Valor Anual', 'Unidade', 'Por Kilo', 'Outro']);
+  useEffect(() => {
+    axios.get('/api/config').then(res => {
+      if (res.data.UNIDADES_MEDIDA) {
+        setUnidadesMedida(res.data.UNIDADES_MEDIDA.split(',').map(s => s.trim()));
+      }
+    });
+  }, []);
+
   useEffect(() => {
     axios.get('/api/setores').then(res => setSetores(res.data));
     

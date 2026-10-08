@@ -456,6 +456,7 @@ const Dashboard = ({ userRole, userSector }) => {
               <tr>
                 <th onClick={() => requestSort('empresa')} style={{ cursor: 'pointer', userSelect: 'none' }}>Empresa {renderSortIcon('empresa')}</th>
                 <th onClick={() => requestSort('setor')} style={{ cursor: 'pointer', userSelect: 'none' }}>Setor {renderSortIcon('setor')}</th>
+                <th>Unid. Medida</th>
                 <th onClick={() => requestSort('vencimento')} style={{ cursor: 'pointer', userSelect: 'none' }}>Vencimento {renderSortIcon('vencimento')}</th>
                 <th onClick={() => requestSort('status')} style={{ cursor: 'pointer', userSelect: 'none' }}>Status {renderSortIcon('status')}</th>
               </tr>
@@ -465,13 +466,14 @@ const Dashboard = ({ userRole, userSector }) => {
                 <tr key={c.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedContract(c)}>
                   <td style={{ fontWeight: 500, maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.empresa}</td>
                   <td style={{ maxWidth: '120px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.setor?.nome}</td>
+                  <td>{c.unidade_medida || '-'}</td>
                   <td>{c.data_vigencia_fim ? new Date(c.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</td>
                   <td>{getStatusBadge(c.status)}</td>
                 </tr>
               ))}
               {sortedContracts.length === 0 && (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
                     Nenhum contrato encontrado.
                   </td>
                 </tr>

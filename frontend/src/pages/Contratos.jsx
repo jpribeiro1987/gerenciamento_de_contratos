@@ -154,6 +154,7 @@ const Contratos = ({ userRole, userSector }) => {
               <th>Empresa</th>
               <th>Setor Resp.</th>
               <th>Valor</th>
+              <th>Unid. Medida</th>
               <th>Vencimento</th>
               <th>Status</th>
               <th>Último Aditivo</th>
@@ -166,6 +167,7 @@ const Contratos = ({ userRole, userSector }) => {
                 <td style={{ fontWeight: 500 }}>{c.empresa}</td>
                 <td>{c.setor?.nome}</td>
                 <td>{c.valor ? formatCurrency(c.valor) : '-'}</td>
+                <td>{c.unidade_medida || '-'}</td>
                 <td>{c.data_vigencia_fim ? new Date(c.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
                 <td>{getStatusBadge(c.status)}</td>
                 <td>
@@ -219,7 +221,7 @@ const Contratos = ({ userRole, userSector }) => {
             ))}
             {filteredContracts.length === 0 && (
               <tr>
-                <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
                   Nenhum contrato encontrado.
                 </td>
               </tr>
