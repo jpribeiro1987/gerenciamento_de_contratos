@@ -28,6 +28,7 @@ router.get('/', async (req, res) => {
         prazo_rescisao_dias: true,
         valor: true,
         valor_tipo: true,
+        unidade_medida: true,
         valor_observacao: true,
         data_contratacao: true,
         data_vigencia_fim: true,
@@ -121,6 +122,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         empresa: data.empresa,
         setorId: parseInt(data.setorId),
         valor: data.valor ? parseFloat(data.valor) : null,
+        unidade_medida: data.unidade_medida || null,
         data_contratacao: data.data_contratacao ? new Date(data.data_contratacao) : null,
         data_vigencia_fim: data.data_vigencia_fim ? new Date(data.data_vigencia_fim) : null,
         renovacao_automatica: data.renovacao_automatica === 'true',
@@ -149,6 +151,7 @@ router.put('/:id', upload.single('pdf'), async (req, res) => {
     if (data.empresa !== undefined) updateData.empresa = data.empresa;
     if (data.setorId !== undefined) updateData.setorId = parseInt(data.setorId);
     if (data.valor !== undefined) updateData.valor = data.valor ? parseFloat(data.valor) : null;
+    if (data.unidade_medida !== undefined) updateData.unidade_medida = data.unidade_medida;
     if (data.data_contratacao !== undefined) updateData.data_contratacao = data.data_contratacao ? new Date(data.data_contratacao) : null;
     if (data.data_vigencia_fim !== undefined) updateData.data_vigencia_fim = data.data_vigencia_fim ? new Date(data.data_vigencia_fim) : null;
     if (data.renovacao_automatica !== undefined) updateData.renovacao_automatica = data.renovacao_automatica === 'true' || data.renovacao_automatica === true;

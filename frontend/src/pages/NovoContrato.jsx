@@ -7,6 +7,7 @@ const NovoContrato = () => {
     empresa: '',
     setorId: '',
     valor: '',
+    unidade_medida: 'Valor Mensal',
     prazo_rescisao_dias: 30,
     data_contratacao: '',
     data_vigencia_fim: '',
@@ -48,7 +49,8 @@ const NovoContrato = () => {
       await axios.post('/api/contratos', payload);
       setSuccess(true);
       setFormData({
-        empresa: '', setorId: '', valor: '', prazo_rescisao_dias: 30,
+        empresa: '', setorId: '', valor: '',
+    unidade_medida: 'Valor Mensal', prazo_rescisao_dias: 30,
         data_contratacao: '', data_vigencia_fim: '', dias_alerta: 30,
         renovacao_automatica: false, observacao: '', pdf: null
       });

@@ -139,12 +139,19 @@ const Dashboard = ({ userRole, userSector }) => {
         setItts(dataItts);
         setDocumentos(dataDocs);
         
+        const valoresAgrupados = {};
+        dataContratos.forEach(c => {
+          const unidade = c.unidade_medida || 'Valor Mensal';
+          if (!valoresAgrupados[unidade]) valoresAgrupados[unidade] = 0;
+          valoresAgrupados[unidade] += (c.valor || 0);
+        });
+
         // Compute metrics for Contratos
         setMetrics({
           total: dataContratos.length,
           vencendo: dataContratos.filter(c => c.status === 'A_VENCER').length,
           vencidos: dataContratos.filter(c => c.status === 'VENCIDO').length,
-          valorTotal: dataContratos.reduce((acc, curr) => acc + (curr.valor || 0), 0)
+          valoresAgrupados
         });
 
         // Compute metrics for ITTs
@@ -255,10 +262,12 @@ const Dashboard = ({ userRole, userSector }) => {
             <span className="metric-title">Vencidos</span>
             <span className={`metric-value ${metrics.vencidos > 0 ? 'danger' : ''}`}>{metrics.vencidos}</span>
           </div>
-          <div className="glass-card metric-card">
-            <span className="metric-title">Valor Total Mensal</span>
-            <span className="metric-value">{formatCurrency(metrics.valorTotal)}</span>
-          </div>
+          {metrics.valoresAgrupados && Object.entries(metrics.valoresAgrupados).map(([unidade, valor]) => (
+            <div className="glass-card metric-card" key={unidade}>
+              <span className="metric-title">Total ({unidade})</span>
+              <span className="metric-value">{formatCurrency(valor)}</span>
+            </div>
+          ))}
         </div>
       </section>
 

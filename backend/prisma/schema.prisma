@@ -37,6 +37,7 @@ model Contrato {
   prazo_rescisao_dias  Int?              
   valor                Float?
   valor_tipo           String?           // FIXO, VARIAVEL
+  unidade_medida       String?           // Valor Mensal, Semestral, Unidade, Por Kilo
   valor_observacao     String?           // "R$ x/turno"
   data_contratacao     DateTime?
   data_vigencia_fim    DateTime?

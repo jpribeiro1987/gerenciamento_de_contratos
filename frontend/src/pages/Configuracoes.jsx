@@ -10,7 +10,8 @@ const Configuracoes = () => {
     EMAIL_TEMPLATE_BODY_ITT: '',
     EMAIL_TEMPLATE_SUBJECT_DOC: '',
     EMAIL_TEMPLATE_BODY_DOC: '',
-    ALERT_CRON_TIME: '06:00'
+    ALERT_CRON_TIME: '06:00',
+    UNIDADES_MEDIDA: 'Valor Mensal, Valor Semestral, Valor Anual, Unidade, Por Kilo, Outro'
   });
   const [smtpConfig, setSmtpConfig] = useState({
     SMTP_HOST: '',
@@ -43,7 +44,8 @@ const Configuracoes = () => {
         EMAIL_TEMPLATE_BODY_ITT: res.data.EMAIL_TEMPLATE_BODY_ITT || '<p>A Instrução Técnica <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p>',
         EMAIL_TEMPLATE_SUBJECT_DOC: res.data.EMAIL_TEMPLATE_SUBJECT_DOC || 'Alerta de Vencimento: Documento {{empresa}}',
         EMAIL_TEMPLATE_BODY_DOC: res.data.EMAIL_TEMPLATE_BODY_DOC || '<p>O documento <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p>',
-        ALERT_CRON_TIME: res.data.ALERT_CRON_TIME || '06:00'
+        ALERT_CRON_TIME: res.data.ALERT_CRON_TIME || '06:00',
+        UNIDADES_MEDIDA: res.data.UNIDADES_MEDIDA || 'Valor Mensal, Valor Semestral, Valor Anual, Unidade, Por Kilo, Outro'
       });
     } catch (err) {
       console.error(err);
@@ -318,6 +320,24 @@ const Configuracoes = () => {
               }}
             />
             <small style={{ color: 'var(--text-muted)' }}>Horário em que o sistema varrerá os contratos e enviará os alertas.</small>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+            <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>
+              Unidades de Medida Permitidas
+            </label>
+            <textarea 
+              name="UNIDADES_MEDIDA" 
+              value={config.UNIDADES_MEDIDA} 
+              onChange={handleChange} 
+              rows={2}
+              required
+              style={{
+                background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', 
+                color: 'var(--text-main)', padding: '12px', borderRadius: '6px', outline: 'none', resize: 'vertical'
+              }}
+            />
+            <small style={{ color: 'var(--text-muted)' }}>Digite as unidades separadas por vírgula (ex: Valor Mensal, Unidade, Por Kilo)</small>
           </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--panel-border)' }} />
