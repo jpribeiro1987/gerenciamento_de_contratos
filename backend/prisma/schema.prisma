@@ -11,9 +11,10 @@ datasource db {
 }
 
 model Setor {
-  id         Int         @id @default(autoincrement())
-  nome       String      @unique
-  contratos  Contrato[]
+  id               Int         @id @default(autoincrement())
+  nome             String      @unique
+  emails_cobranca  String?
+  contratos        Contrato[]
   itts       Itt[]
   documentos Documento[]
   usuarios   Usuario[]   @relation("UsuarioSetor")

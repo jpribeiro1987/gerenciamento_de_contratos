@@ -301,17 +301,17 @@ const Dashboard = ({ userRole, userSector }) => {
       </section>
 
       {/* CHARTS */}
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px' }}>
         
         {/* Status Chart - Contratos */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ marginBottom: '16px', fontSize: '1.1rem', fontWeight: 600 }}>Contratos por Status</div>
-          <div style={{ flex: 1, minHeight: '250px' }}>
+          <div style={{ flex: 1, minHeight: '450px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={contratoStatusData}
-                  cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value"
+                  cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={2} dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {contratoStatusData.map((entry, index) => (
@@ -327,12 +327,12 @@ const Dashboard = ({ userRole, userSector }) => {
         {/* Status Chart - ITTs */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ marginBottom: '16px', fontSize: '1.1rem', fontWeight: 600 }}>ITTs por Status</div>
-          <div style={{ flex: 1, minHeight: '250px' }}>
+          <div style={{ flex: 1, minHeight: '450px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={ittStatusData}
-                  cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value"
+                  cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={2} dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {ittStatusData.map((entry, index) => (
@@ -349,7 +349,7 @@ const Dashboard = ({ userRole, userSector }) => {
         {(userRole === 'ADMIN' || userRole === 'LEITURA') && (
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gridColumn: '1 / -1' }}>
             <div style={{ marginBottom: '16px', fontSize: '1.1rem', fontWeight: 600 }}>Maiores Custos por Setor (Contratos)</div>
-            <div style={{ flex: 1, minHeight: '250px' }}>
+            <div style={{ flex: 1, minHeight: '350px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={sectorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} />
@@ -363,6 +363,7 @@ const Dashboard = ({ userRole, userSector }) => {
               </ResponsiveContainer>
             </div>
           </div>
+
         )}
 
       </section>

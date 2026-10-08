@@ -18,8 +18,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { nome } = req.body;
-    const setor = await prisma.setor.create({ data: { nome } });
+    const { nome, emails_cobranca } = req.body;
+    const setor = await prisma.setor.create({ data: { nome, emails_cobranca } });
     res.status(201).json(setor);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar setor' });
@@ -29,8 +29,11 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome } = req.body;
-    const setor = await prisma.setor.update({ where: { id: parseInt(id) }, data: { nome } });
+    const { nome, emails_cobranca } = req.body;
+    const setor = await prisma.setor.update({ 
+      where: { id: parseInt(id) }, 
+      data: { nome, emails_cobranca } 
+    });
     res.json(setor);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao atualizar setor' });

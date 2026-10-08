@@ -232,8 +232,14 @@ router.post('/:id/alert-manual', async (req, res) => {
 
     if (!contract) return res.status(404).json({ error: 'Contrato não encontrado' });
 
-    const emails = contract.setor.usuarios.map(u => u.email);
+    let emails = contract.setor.usuarios.map(u => u.email);
+          if (contract.setor.emails_cobranca) {
+            emails = emails.concat(contract.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          }
     const uniqueEmails = [...new Set(emails)].join(',');
+    if (!uniqueEmails) {
+      return res.status(400).json({ error: 'Nenhum e-mail configurado para este setor.' });
+    }
 
     const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_CONTRATO' } });
     const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_CONTRATO' } });

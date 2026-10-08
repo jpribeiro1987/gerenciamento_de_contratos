@@ -39,26 +39,40 @@ const Login = ({ onLoginSuccess, theme, setTheme }) => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: 'var(--bg-main)', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      <button 
-        onClick={toggleTheme}
-        style={{
-          position: 'absolute', top: '24px', right: '24px',
-          display: 'flex', alignItems: 'center', gap: '8px',
-          padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--panel-border)',
-          background: 'rgba(0,0,0,0.1)', color: 'var(--text-main)', cursor: 'pointer',
-          fontSize: '0.9rem', fontWeight: 500, transition: 'all 0.2s ease'
-        }}
-      >
-        {theme === 'theme-light' ? <Moon size={16} /> : <Sun size={16} />}
-        <span>{theme === 'theme-light' ? 'Tema Escuro' : 'Tema Claro'}</span>
-      </button>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: 'var(--bg-color)' }}>
+      {/* Left Side: Background Image */}
+      <div style={{ 
+        flex: 1, 
+        backgroundImage: 'url(/login_bg.jpg)', 
+        backgroundSize: 'cover', 
+        backgroundPosition: 'center',
+        position: 'relative'
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.4), rgba(0,0,0,0.8))' }} />
+      </div>
 
-      <div className="glass-card" style={{ maxWidth: '400px', width: '100%', padding: '40px', display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
+      {/* Right Side: Login Form */}
+      <div style={{ width: '450px', display: 'flex', flexDirection: 'column', padding: '40px', background: 'var(--bg-color)', position: 'relative', justifyContent: 'center' }}>
         
-        <div style={{ textAlign: 'center', width: '100%' }}>
-          <img src="/logo.png" alt="Logo Instituição" style={{ maxWidth: '100%', maxHeight: '80px', objectFit: 'contain', marginBottom: '16px' }} 
-               onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
+        <button 
+          onClick={toggleTheme}
+          style={{
+            position: 'absolute', top: '24px', right: '24px',
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--panel-border)',
+            background: 'rgba(0,0,0,0.1)', color: 'var(--text-main)', cursor: 'pointer',
+            fontSize: '0.9rem', fontWeight: 500, transition: 'all 0.2s ease'
+          }}
+        >
+          {theme === 'theme-light' ? <Moon size={16} /> : <Sun size={16} />}
+          <span>{theme === 'theme-light' ? 'Tema Escuro' : 'Tema Claro'}</span>
+        </button>
+
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <img src="/logo.png" alt="Logo Instituição" style={{ maxWidth: '100%', maxHeight: '80px', objectFit: 'contain', marginBottom: '16px' }} 
+                 onError={(e) => { e.target.style.display = 'none'; }} />
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--primary)' }}>Sistema de Gestão de Contratos e Instruções Técnicas de Trabalho (ITT)</h1>
           <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Faça login para acessar o sistema</p>
         </div>
@@ -102,11 +116,11 @@ const Login = ({ onLoginSuccess, theme, setTheme }) => {
         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' }}>
           Esqueceu sua senha? Solicite ao administrador do sistema para redefini-la.
         </p>
-
-      </div>
-      
-      <div style={{ position: 'absolute', bottom: '16px', width: '100%', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-        Desenvolvido por João Paulo Ribeiro
+        </div>
+        
+        <div style={{ position: 'absolute', bottom: '16px', width: '100%', left: 0, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+          Desenvolvido por João Paulo Ribeiro
+        </div>
       </div>
     </div>
   );

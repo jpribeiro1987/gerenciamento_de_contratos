@@ -74,7 +74,7 @@ const Itts = ({ userRole, userSector }) => {
         alert('E-mail enviado com sucesso!');
       } catch (err) {
         console.error(err);
-        alert('Erro ao enviar e-mail.');
+        alert(err.response?.data?.error || 'Erro ao enviar e-mail.');
       }
     }
   };

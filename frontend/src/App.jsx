@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Configuracoes from './pages/Configuracoes';
 import Relatorios from './pages/Relatorios';
 import FilaEmails from './pages/FilaEmails';
+import Manual from './pages/Manual';
 import './index.css';
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
         {activeTab === 'setores' && <SetoresUsuarios />}
         {activeTab === 'relatorios' && <Relatorios userRole={userRole} userSector={userSector} />}
         {activeTab === 'fila_emails' && <FilaEmails userRole={userRole} />}
+        {activeTab === 'manual' && userRole === 'ADMIN' && <Manual />}
       </main>
     </div>
   );

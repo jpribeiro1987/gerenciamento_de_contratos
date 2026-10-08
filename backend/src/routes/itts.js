@@ -219,8 +219,14 @@ router.post('/:id/alert-manual', async (req, res) => {
 
     if (!itt) return res.status(404).json({ error: 'ITT não encontrada' });
 
-    const emails = itt.setor.usuarios.map(u => u.email);
+    let emails = itt.setor.usuarios.map(u => u.email);
+          if (itt.setor.emails_cobranca) {
+            emails = emails.concat(itt.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          }
     const uniqueEmails = [...new Set(emails)].join(',');
+    if (!uniqueEmails) {
+      return res.status(400).json({ error: 'Nenhum e-mail configurado para este setor.' });
+    }
 
     const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_ITT' } });
     const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_ITT' } });

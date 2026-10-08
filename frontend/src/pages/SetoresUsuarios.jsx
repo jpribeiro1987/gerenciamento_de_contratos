@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Edit, Trash2, Plus, Users, Building } from 'lucide-react';
+import ModalEditarSetor from '../components/ModalEditarSetor';
 
 const SetoresUsuarios = () => {
   const [activeTab, setActiveTab] = useState('setores');
   
   // States para Setores
   const [setores, setSetores] = useState([]);
-  const [newSetorNome, setNewSetorNome] = useState('');
+  const [editingSetor, setEditingSetor] = useState(null);
+  const [setorFormData, setSetorFormData] = useState({ nome: '', emails_cobranca: '' });
   
   // States para Usuários
   const [usuarios, setUsuarios] = useState([]);
@@ -37,14 +39,22 @@ const SetoresUsuarios = () => {
   };
 
   // --- Funções de Setores ---
-  const handleAddSetor = async (e) => {
+  const handleSaveSetor = async (e) => {
     e.preventDefault();
-    if (!newSetorNome) return;
+    if (!setorFormData.nome) return;
     try {
-      await axios.post('/api/setores', { nome: newSetorNome });
-      setNewSetorNome('');
+      await axios.post('/api/setores', setorFormData);
+      setSetorFormData({ nome: '', emails_cobranca: '' });
       fetchSetores();
     } catch (err) { alert('Erro ao criar setor'); }
+  };
+
+  const handleEditSetor = (s) => {
+    setEditingSetor(s);
+  };
+
+  const handleSaveEditModal = () => {
+    fetchSetores();
   };
 
   const handleDeleteSetor = async (id) => {
@@ -131,22 +141,25 @@ const SetoresUsuarios = () => {
 
       {activeTab === 'setores' && (
         <section className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <form onSubmit={handleAddSetor} style={{ display: 'flex', gap: '12px' }}>
+          <form onSubmit={handleSaveSetor} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <input 
               type="text" 
               placeholder="Nome do Novo Setor" 
-              value={newSetorNome}
-              onChange={e => setNewSetorNome(e.target.value)}
+              value={setorFormData.nome}
+              onChange={e => setSetorFormData({...setorFormData, nome: e.target.value})}
               style={{ ...inputStyle, flex: 1 }}
               required
             />
-            <button type="submit" style={btnStyle}><Plus size={18} /> Adicionar</button>
+            <button type="submit" style={btnStyle}>
+              <Plus size={18} /> Adicionar
+            </button>
           </form>
 
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--panel-border)', textAlign: 'left' }}>
                 <th style={{ padding: '12px' }}>Setor</th>
+                <th style={{ padding: '12px' }}>E-mails de Cobrança</th>
                 <th style={{ padding: '12px', textAlign: 'right' }}>Ações</th>
               </tr>
             </thead>
@@ -154,7 +167,11 @@ const SetoresUsuarios = () => {
               {setores.map(s => (
                 <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   <td style={{ padding: '12px' }}>{s.nome}</td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>
+                  <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{s.emails_cobranca || '-'}</td>
+                  <td style={{ padding: '12px', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                    <button onClick={() => handleEditSetor(s)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}>
+                      <Edit size={18} />
+                    </button>
                     <button onClick={() => handleDeleteSetor(s.id)} style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}>
                       <Trash2 size={18} />
                     </button>
@@ -269,6 +286,13 @@ const SetoresUsuarios = () => {
         </section>
       )}
 
+      {editingSetor && (
+        <ModalEditarSetor 
+          setor={editingSetor} 
+          onClose={() => setEditingSetor(null)} 
+          onSave={handleSaveEditModal} 
+        />
+      )}
     </div>
   );
 };

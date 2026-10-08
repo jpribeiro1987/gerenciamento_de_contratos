@@ -84,9 +84,16 @@ async function checkContractsAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para o contrato ${contract.id} (${contract.empresa})`);
-          const emails = contract.setor.usuarios.map(u => u.email);
+          let emails = contract.setor.usuarios.map(u => u.email);
+          if (contract.setor.emails_cobranca) {
+            emails = emails.concat(contract.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          }
           
           const uniqueEmails = [...new Set(emails)].join(',');
+          if (!uniqueEmails) {
+            console.log(`[AlertJob] Nenhum e-mail configurado para o setor. Pulando envio.`);
+            continue;
+          }
           
           // Get templates
           const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_CONTRATO' } });
@@ -207,8 +214,15 @@ async function checkIttsAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para ITT ${itt.id} (${itt.titulo})`);
-          const emails = itt.setor.usuarios.map(u => u.email);
+          let emails = itt.setor.usuarios.map(u => u.email);
+          if (itt.setor.emails_cobranca) {
+            emails = emails.concat(itt.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          }
           const uniqueEmails = [...new Set(emails)].join(',');
+          if (!uniqueEmails) {
+            console.log(`[AlertJob] Nenhum e-mail configurado para o setor. Pulando envio.`);
+            continue;
+          }
           
           const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_ITT' } });
           const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_ITT' } });
@@ -314,8 +328,15 @@ async function checkDocumentosAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para Documento ${doc.id} (${doc.titulo})`);
-          const emails = doc.setor.usuarios.map(u => u.email);
+          let emails = doc.setor.usuarios.map(u => u.email);
+          if (doc.setor.emails_cobranca) {
+            emails = emails.concat(doc.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          }
           const uniqueEmails = [...new Set(emails)].join(',');
+          if (!uniqueEmails) {
+            console.log(`[AlertJob] Nenhum e-mail configurado para o setor. Pulando envio.`);
+            continue;
+          }
           
           const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_DOC' } });
           const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_DOC' } });
