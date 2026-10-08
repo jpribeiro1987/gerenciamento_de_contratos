@@ -119,10 +119,16 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={labelStyle}>Valor Mensal (R$)</label>
+              <label style={labelStyle}>Valor (R$)</label>
               <input type="number" step="0.01" name="valor" value={formData.valor} onChange={handleChange} style={inputStyle} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={labelStyle}>Unid. Contratada</label>
+              <select name="unidade_medida" value={formData.unidade_medida || unidadesMedida[0]} onChange={handleChange} style={inputStyle}>
+                {unidadesMedida.map((u, i) => <option key={i} value={u}>{u}</option>)}
+              </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Início</label>

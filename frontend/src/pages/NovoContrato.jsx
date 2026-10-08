@@ -8,6 +8,7 @@ const NovoContrato = () => {
     setorId: '',
     valor: '',
     unidade_medida: 'Valor Mensal',
+    unidade_medida: 'Valor Mensal',
     prazo_rescisao_dias: 30,
     data_contratacao: '',
     data_vigencia_fim: '',
@@ -50,6 +51,7 @@ const NovoContrato = () => {
       setSuccess(true);
       setFormData({
         empresa: '', setorId: '', valor: '',
+    unidade_medida: 'Valor Mensal',
     unidade_medida: 'Valor Mensal', prazo_rescisao_dias: 30,
         data_contratacao: '', data_vigencia_fim: '', dias_alerta: 30,
         renovacao_automatica: false, observacao: '', pdf: null
@@ -90,10 +92,17 @@ const NovoContrato = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label>Valor Mensal (R$)</label>
+            <label>Valor (R$)</label>
             <input type="number" step="0.01" name="valor" value={formData.valor} onChange={handleChange} style={inputStyle} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label>Unidade Contratada</label>
+            <select name="unidade_medida" value={formData.unidade_medida} onChange={handleChange} style={inputStyle}>
+              {unidadesMedida.map((u, i) => <option key={i} value={u}>{u}</option>)}
+            </select>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
