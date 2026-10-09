@@ -63,7 +63,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
         </div>
         
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Título *</label>
               <input type="text" name="titulo" required value={formData.titulo} onChange={handleChange} style={inputStyle} />
@@ -77,7 +77,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Data de Emissão</label>
               <input type="date" name="data_emissao" value={formData.data_emissao} onChange={handleChange} style={inputStyle} />
@@ -88,7 +88,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Dias p/ Alerta</label>
               <input type="number" name="dias_alerta" value={formData.dias_alerta} onChange={handleChange} style={inputStyle} />
@@ -106,7 +106,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Observações</label>
               <textarea name="observacao" rows={3} value={formData.observacao} onChange={handleChange} style={{ ...inputStyle, resize: 'vertical' }} />

@@ -310,7 +310,7 @@ const Dashboard = ({ userRole, userSector }) => {
       </section>
 
       {/* CHARTS */}
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px' }}>
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: '24px' }}>
         
         {/* Status Chart - Contratos */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -444,7 +444,7 @@ const Dashboard = ({ userRole, userSector }) => {
       )}
 
       {/* TABLES ROW */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid-2-col" style={{gap: "24px"}}>
         
         {/* Contratos Table */}
         <section className="glass-card table-container">

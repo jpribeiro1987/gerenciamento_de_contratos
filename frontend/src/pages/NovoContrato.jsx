@@ -81,7 +81,7 @@ const NovoContrato = () => {
 
       <form onSubmit={handleSubmit} className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="grid-2-col">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label>Empresa Fornecedora *</label>
             <input type="text" name="empresa" required value={formData.empresa} onChange={handleChange} style={inputStyle} />
@@ -96,7 +96,7 @@ const NovoContrato = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+        <div className="grid-4-col">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label>Valor (R$)</label>
             <input type="number" step="0.01" name="valor" value={formData.valor} onChange={handleChange} style={inputStyle} />
@@ -120,7 +120,7 @@ const NovoContrato = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+        <div className="grid-3-col">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label>Dias p/ Alerta de Vencimento</label>
             <input type="number" name="dias_alerta" value={formData.dias_alerta} onChange={handleChange} style={inputStyle} />

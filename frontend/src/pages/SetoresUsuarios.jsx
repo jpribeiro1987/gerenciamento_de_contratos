@@ -201,7 +201,7 @@ const SetoresUsuarios = () => {
             <form onSubmit={handleSaveUser} style={{ background: 'rgba(0,0,0,0.1)', padding: '24px', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3>{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</h3>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="grid-2-col">
                 <input type="text" name="nome" placeholder="Nome Completo" value={userFormData.nome} onChange={handleUserChange} style={inputStyle} required />
                 <input type="email" name="email" placeholder="E-mail" value={userFormData.email} onChange={handleUserChange} style={inputStyle} required />
                 <input 

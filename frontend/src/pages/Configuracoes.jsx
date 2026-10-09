@@ -165,7 +165,7 @@ const Configuracoes = () => {
           <Server size={20} color="var(--primary)" /> Configuração SMTP
         </h2>
         
-        <form onSubmit={handleSaveSmtp} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <form onSubmit={handleSaveSmtp} className="grid-2-col" style={{gap: "20px"}}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: '1 / span 2' }}>
             <label style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Servidor SMTP (Host)</label>
             <input 

@@ -114,7 +114,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
         </div>
         
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Empresa</label>
               <input type="text" name="empresa" required value={formData.empresa} onChange={handleChange} style={inputStyle} />
@@ -128,7 +128,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+          <div className="grid-4-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Valor (R$)</label>
               <input type="number" step="0.01" name="valor" value={formData.valor} onChange={handleChange} style={inputStyle} />
@@ -149,7 +149,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+          <div className="grid-3-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Dias p/ Alerta</label>
               <input type="number" name="dias_alerta" value={formData.dias_alerta} onChange={handleChange} style={inputStyle} />
@@ -164,7 +164,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+          <div className="grid-3-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Status</label>
               <select name="status" value={formData.status || 'VIGENTE'} onChange={handleChange} style={inputStyle}>
@@ -181,7 +181,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+          <div className="grid-1-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Substituir PDF Anexo</label>
               <input type="file" name="pdf" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleChange} style={inputStyle} />
@@ -319,7 +319,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
                 </button>
               )}
             </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div className="grid-3-col" style={{marginBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={labelStyle}>Descrição *</label>
                 <input 
@@ -350,7 +350,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div className="grid-2-col" style={{marginBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={labelStyle}>Novo Valor (Opcional)</label>
                 <input 

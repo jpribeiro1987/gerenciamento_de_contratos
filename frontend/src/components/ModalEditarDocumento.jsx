@@ -91,7 +91,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
         </div>
         
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Tipo *</label>
               <select name="tipo" required value={formData.tipo} onChange={handleChange} style={inputStyle}>
@@ -111,7 +111,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Título / Descrição</label>
               <input type="text" name="titulo" required value={formData.titulo} onChange={handleChange} style={inputStyle} />
@@ -122,7 +122,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Data de Emissão</label>
               <input type="date" name="data_emissao" value={formData.data_emissao} onChange={handleChange} style={inputStyle} />
@@ -133,7 +133,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Dias p/ Alerta</label>
               <input type="number" name="dias_alerta" value={formData.dias_alerta} onChange={handleChange} style={inputStyle} />
@@ -151,7 +151,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Observações</label>
               <textarea name="observacao" rows={3} value={formData.observacao} onChange={handleChange} style={{ ...inputStyle, resize: 'vertical' }} />
@@ -325,7 +325,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
           {/* Form Nova Renovação */}
           <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
             <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem' }}>Registrar Nova Renovação</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div className="grid-2-col" style={{marginBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={labelStyle}>Descrição *</label>
                 <input 
@@ -347,7 +347,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '16px' }}>
+            <div className="grid-1-col" style={{marginBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={labelStyle}>Anexar PDF da Renovação</label>
                 <input 
