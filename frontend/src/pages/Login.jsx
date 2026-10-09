@@ -7,9 +7,19 @@ const Login = ({ onLoginSuccess, theme, setTheme }) => {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [captchaNum1, setCaptchaNum1] = useState(Math.floor(Math.random() * 10) + 1);
+  const [captchaNum2, setCaptchaNum2] = useState(Math.floor(Math.random() * 10) + 1);
+  const [captchaInput, setCaptchaInput] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (parseInt(captchaInput) !== captchaNum1 + captchaNum2) {
+      setError('CAPTCHA incorreto. Tente novamente.');
+      setCaptchaNum1(Math.floor(Math.random() * 10) + 1);
+      setCaptchaNum2(Math.floor(Math.random() * 10) + 1);
+      setCaptchaInput('');
+      return;
+    }
     setLoading(true);
     setError('');
 
@@ -108,6 +118,20 @@ const Login = ({ onLoginSuccess, theme, setTheme }) => {
             />
           </div>
 
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ padding: '12px', background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', borderRadius: '8px', fontWeight: 'bold', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
+              {captchaNum1} + {captchaNum2} = ?
+            </span>
+            <input 
+              type="number" 
+              placeholder="Resultado" 
+              value={captchaInput}
+              onChange={(e) => setCaptchaInput(e.target.value)}
+              required
+              style={{ ...inputStyle, flex: 1 }}
+            />
+          </div>
           <button type="submit" disabled={loading} style={{ ...btnStyle, marginTop: '8px' }}>
             {loading ? 'Autenticando...' : 'Entrar'}
           </button>

@@ -8,8 +8,8 @@ const Sidebar = ({ activeTab, setActiveTab, userRole, onLogout, theme, setTheme 
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-title" style={{ padding: '24px 24px 12px 24px', justifyContent: 'center' }}>
-        <img src="/logo.png" alt="Logo Instituição" style={{ maxHeight: '60px', width: 'auto', objectFit: 'contain' }} 
+      <div className="sidebar-title" style={{ justifyContent: 'center' }}>
+        <img src="/logo.png" alt="Logo Instituição" style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }} 
              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
         <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
           <Grid size={24} />
