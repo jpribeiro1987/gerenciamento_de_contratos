@@ -118,7 +118,7 @@ const Relatorios = ({ userRole, userSector }) => {
         <div style={{ marginBottom: '16px', fontSize: '0.9rem', color: '#444' }}>
           <strong>Filtros aplicados:</strong> 
           {filtroSetor ? ` Setor: ${setores.find(s => s.id.toString() === filtroSetor)?.nome} |` : ' Todos os setores |'}
-          {filtroStatus ? ` Status: ${filtroStatus} |` : ' Todos os status |'}
+          {filtroStatus ? ` Status: ${filtroStatus === 'EM_ANALISE' ? 'EM ANÁLISE' : (filtroStatus === 'A_VENCER' ? 'A VENCER' : filtroStatus)} |` : ' Todos os status |'}
           {filtroDataInicio || filtroDataFim ? ` Vencimento: ${filtroDataInicio ? new Date(filtroDataInicio + 'T00:00:00').toLocaleDateString('pt-BR') : '...'} a ${filtroDataFim ? new Date(filtroDataFim + 'T23:59:59').toLocaleDateString('pt-BR') : '...'}` : ' Sem limite de datas'}
         </div>
       </div>
@@ -177,6 +177,7 @@ const Relatorios = ({ userRole, userSector }) => {
               <option value="VIGENTE">Vigente</option>
               <option value="A_VENCER">A Vencer</option>
               <option value="VENCIDO">Vencido</option>
+              <option value="EM_ANALISE">Em Análise</option>
               <option value="RENOVADO">Renovado/Revisado</option>
               <option value="ENCERRADO">Encerrado/Cancelado</option>
             </select>
@@ -254,8 +255,8 @@ const Relatorios = ({ userRole, userSector }) => {
                     {filtroTipo === 'CONTRATOS' && <td>{item.valor ? `R$ ${item.valor}` : '-'}</td>}
                     <td>{item.data_vigencia_fim ? new Date(item.data_vigencia_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Indeterminado'}</td>
                     <td>
-                      <span className={`badge ${getStatusBadgeClass(item.status)}`}>
-                        {item.status === 'A_VENCER' ? 'A VENCER' : item.status}
+                      <span className={`badge ${getStatusBadgeClass(item.status)}`} style={item.status === 'EM_ANALISE' ? { background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' } : {}}>
+                        {item.status === 'A_VENCER' ? 'A VENCER' : (item.status === 'EM_ANALISE' ? 'EM ANÁLISE' : item.status)}
                       </span>
                     </td>
                   </tr>
