@@ -5,8 +5,7 @@ const path = require('path');
 const { sendEmail } = require('../services/emailService');
 const { scheduleAlertJob } = require('../services/alertJob');
 
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../prisma');
 const envPath = path.resolve(__dirname, '../../.env');
 
 // Get SMTP config

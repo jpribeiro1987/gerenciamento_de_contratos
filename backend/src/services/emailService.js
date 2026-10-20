@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../prisma');
 
 const sendEmail = async (to, subject, html) => {
   // Buscar configs SMTP no banco de dados (ignorando o .env)

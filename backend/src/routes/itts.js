@@ -1,10 +1,9 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
 const multer = require('multer');
 const { sendEmail } = require('../services/emailService');
 
 const router = express.Router();
-const prisma = new PrismaClient();
+const prisma = require('../prisma');
 
 // Configuração do Multer para armazenamento em memória (para converter em Base64)
 const upload = multer({ 

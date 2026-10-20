@@ -1,13 +1,10 @@
 const cron = require('node-cron');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prisma');
 const { sendEmail } = require('./emailService');
-
-const prisma = new PrismaClient();
 
 let currentCronTask = null;
 
 async function scheduleAlertJob(timeString = "06:00") {
-  // Parar tarefa antiga se existir
   if (currentCronTask) {
     currentCronTask.stop();
   }
@@ -27,9 +24,6 @@ async function scheduleAlertJob(timeString = "06:00") {
   });
 }
 
-// Removido o disparo automático no momento em que o servidor liga. 
-// O robô agora só roda estritamente no horário agendado.
-
 async function checkContractsAndAlert() {
   try {
     const today = new Date();
@@ -40,8 +34,14 @@ async function checkContractsAndAlert() {
         status: { in: ['VIGENTE', 'A_VENCER', 'VENCIDO'] },
         data_vigencia_fim: { not: null }
       },
-      include: {
-        setor: true
+      select: {
+        id: true,
+        empresa: true,
+        status: true,
+        data_vigencia_fim: true,
+        dias_alerta: true,
+        emails_cobranca: true,
+        setor: { select: { id: true, nome: true } }
       }
     });
 
@@ -52,8 +52,6 @@ async function checkContractsAndAlert() {
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
       if (diffDays <= contract.dias_alerta) {
-        
-        // Update status if it's not already A_VENCER or VENCIDO
         if (contract.status === 'VIGENTE' && diffDays >= 0) {
           await prisma.contrato.update({
             where: { id: contract.id },
@@ -66,7 +64,6 @@ async function checkContractsAndAlert() {
           });
         }
 
-        // Check if we already sent an automatic email today
         const lastAlert = await prisma.historicoAlerta.findFirst({
           where: { 
             contratoId: contract.id,
@@ -75,7 +72,6 @@ async function checkContractsAndAlert() {
           orderBy: { data_envio: 'desc' }
         });
 
-        // Disparo é DIÁRIO a partir dos "Dias p/ Alerta"
         let shouldSend = !lastAlert || (new Date().getTime() - lastAlert.data_envio.getTime()) > (23 * 60 * 60 * 1000);
 
         if (shouldSend) {
@@ -91,14 +87,12 @@ async function checkContractsAndAlert() {
             continue;
           }
           
-          // Get templates
           const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_CONTRATO' } });
           const configBody = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_BODY_CONTRATO' } });
 
           let subject = configSubject?.valor || `Alerta de Vencimento: Contrato {{empresa}}`;
           let html = configBody?.valor || `<p>O contrato com a empresa <b>{{empresa}}</b> (Setor: {{setor}}) vencerá em {{dias}} dias, no dia {{data_vencimento}}.</p><p>Por favor, providencie a renovação.</p>`;
 
-          // Replace variables
           const dataFormatada = contract.data_vigencia_fim.toLocaleDateString('pt-BR');
           
           const diasAbs = Math.abs(diffDays);
@@ -156,8 +150,14 @@ async function checkIttsAndAlert() {
         status: { in: ['VIGENTE', 'A_VENCER', 'VENCIDO'] },
         data_vigencia_fim: { not: null }
       },
-      include: {
-        setor: true
+      select: {
+        id: true,
+        titulo: true,
+        status: true,
+        data_vigencia_fim: true,
+        dias_alerta: true,
+        emails_cobranca: true,
+        setor: { select: { id: true, nome: true } }
       }
     });
 
@@ -200,7 +200,6 @@ async function checkIttsAndAlert() {
             shouldSend = (new Date().getTime() - lastAlert.data_envio.getTime()) > (30 * 24 * 60 * 60 * 1000);
           }
         } else {
-          // Vencido (diffDays <= 0)
           shouldSend = !lastAlert || (new Date().getTime() - lastAlert.data_envio.getTime()) > (6.5 * 24 * 60 * 60 * 1000);
         }
 
@@ -281,8 +280,14 @@ async function checkDocumentosAndAlert() {
         status: { in: ['VIGENTE', 'A_VENCER', 'VENCIDO'] },
         data_vigencia_fim: { not: null }
       },
-      include: {
-        setor: true
+      select: {
+        id: true,
+        titulo: true,
+        status: true,
+        data_vigencia_fim: true,
+        dias_alerta: true,
+        emails_cobranca: true,
+        setor: { select: { id: true, nome: true } }
       }
     });
 
@@ -313,7 +318,6 @@ async function checkDocumentosAndAlert() {
           orderBy: { data_envio: 'desc' }
         });
 
-        // Disparo é DIÁRIO a partir dos "Dias p/ Alerta"
         let shouldSend = !lastAlert || (new Date().getTime() - lastAlert.data_envio.getTime()) > (23 * 60 * 60 * 1000);
 
         if (shouldSend) {
@@ -390,12 +394,13 @@ async function migrateInitialEmailsCobranca() {
       return;
     }
 
-    console.log('[Migration] Executando migração inicial única de e-mails de cobrança para Contratos, ITTs e Documentos...');
+    console.log('[Migration] Executando migração inicial única de e-mails de cobrança...');
 
     const setores = await prisma.setor.findMany({
       include: { usuarios: true }
     });
 
+    const setorEmailMap = {};
     for (const setor of setores) {
       const nonSeedUsers = setor.usuarios.filter(u => u.email.toLowerCase() !== 'admin@hospital.com');
       const targetUsers = nonSeedUsers.length > 0 ? nonSeedUsers : setor.usuarios;
@@ -407,30 +412,63 @@ async function migrateInitialEmailsCobranca() {
       }
 
       const uniqueEmails = [...new Set(emails)].join(', ');
-      if (!uniqueEmails) continue;
+      if (uniqueEmails) {
+        setorEmailMap[setor.id] = uniqueEmails;
+      }
+    }
 
+    // Atualizar buscando apenas id e setorId (sem ler a coluna anexos pesada) e atualizando pela chave primária id
+    const contratosPendentes = await prisma.contrato.findMany({
+      where: { OR: [{ emails_cobranca: null }, { emails_cobranca: '' }] },
+      select: { id: true, setorId: true }
+    });
+    const contratosPorSetor = {};
+    for (const c of contratosPendentes) {
+      if (setorEmailMap[c.setorId]) {
+        if (!contratosPorSetor[c.setorId]) contratosPorSetor[c.setorId] = [];
+        contratosPorSetor[c.setorId].push(c.id);
+      }
+    }
+    for (const [setorId, ids] of Object.entries(contratosPorSetor)) {
       await prisma.contrato.updateMany({
-        where: {
-          setorId: setor.id,
-          OR: [{ emails_cobranca: null }, { emails_cobranca: '' }]
-        },
-        data: { emails_cobranca: uniqueEmails }
+        where: { id: { in: ids } },
+        data: { emails_cobranca: setorEmailMap[setorId] }
       });
+    }
 
+    const ittsPendentes = await prisma.itt.findMany({
+      where: { OR: [{ emails_cobranca: null }, { emails_cobranca: '' }] },
+      select: { id: true, setorId: true }
+    });
+    const ittsPorSetor = {};
+    for (const i of ittsPendentes) {
+      if (setorEmailMap[i.setorId]) {
+        if (!ittsPorSetor[i.setorId]) ittsPorSetor[i.setorId] = [];
+        ittsPorSetor[i.setorId].push(i.id);
+      }
+    }
+    for (const [setorId, ids] of Object.entries(ittsPorSetor)) {
       await prisma.itt.updateMany({
-        where: {
-          setorId: setor.id,
-          OR: [{ emails_cobranca: null }, { emails_cobranca: '' }]
-        },
-        data: { emails_cobranca: uniqueEmails }
+        where: { id: { in: ids } },
+        data: { emails_cobranca: setorEmailMap[setorId] }
       });
+    }
 
+    const docsPendentes = await prisma.documento.findMany({
+      where: { OR: [{ emails_cobranca: null }, { emails_cobranca: '' }] },
+      select: { id: true, setorId: true }
+    });
+    const docsPorSetor = {};
+    for (const d of docsPendentes) {
+      if (setorEmailMap[d.setorId]) {
+        if (!docsPorSetor[d.setorId]) docsPorSetor[d.setorId] = [];
+        docsPorSetor[d.setorId].push(d.id);
+      }
+    }
+    for (const [setorId, ids] of Object.entries(docsPorSetor)) {
       await prisma.documento.updateMany({
-        where: {
-          setorId: setor.id,
-          OR: [{ emails_cobranca: null }, { emails_cobranca: '' }]
-        },
-        data: { emails_cobranca: uniqueEmails }
+        where: { id: { in: ids } },
+        data: { emails_cobranca: setorEmailMap[setorId] }
       });
     }
 

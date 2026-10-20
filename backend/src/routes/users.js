@@ -1,9 +1,8 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 
-const prisma = new PrismaClient();
+const prisma = require('../prisma');
 
 // Get all users
 router.get('/', async (req, res) => {

@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
-const { checkContractsAndAlert, scheduleAlertJob } = require('./services/alertJob');
 
 dotenv.config();
 
@@ -34,11 +33,11 @@ app.use('/api/itts', ittsRouter);
 // Simple healthcheck
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-// Start background jobs
 const { initJobs } = require('./services/alertJob');
-initJobs();
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Backend server running on port ${PORT}`);
+
+initJobs().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Backend server running on port ${PORT}`);
+  });
 });
