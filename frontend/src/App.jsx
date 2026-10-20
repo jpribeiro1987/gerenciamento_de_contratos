@@ -11,6 +11,7 @@ import Configuracoes from './pages/Configuracoes';
 import Relatorios from './pages/Relatorios';
 import FilaEmails from './pages/FilaEmails';
 import Manual from './pages/Manual';
+import Versionamento from './pages/Versionamento';
 import './index.css';
 
 function App() {
@@ -48,9 +49,6 @@ function App() {
     );
   }
 
-  // Se o usuário for GESTOR, ele pode estar vinculado a 1 ou mais setores. 
-  // Para fins da prop antiga `userSector`, podemos passar o primeiro setor dele, 
-  // mas o ideal seria passar o array completo. Vou passar a prop `userSectors` também.
   const userRole = user.perfil;
   const userSector = user.setores && user.setores.length > 0 ? user.setores[0].id : null;
 
@@ -68,6 +66,7 @@ function App() {
         {activeTab === 'relatorios' && <Relatorios userRole={userRole} userSector={userSector} />}
         {activeTab === 'fila_emails' && <FilaEmails userRole={userRole} />}
         {activeTab === 'manual' && userRole === 'ADMIN' && <Manual />}
+        {activeTab === 'versionamento' && <Versionamento userRole={userRole} />}
       </main>
     </div>
   );

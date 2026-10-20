@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, Save, FileText, Plus, Trash2, Edit } from 'lucide-react';
+import SeletorEmailsCobranca from './SeletorEmailsCobranca';
 
 const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
   const [setores, setSetores] = useState([]);
@@ -28,6 +29,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
       data_emissao: formatForInput(documento.data_emissao),
       data_vigencia_fim: formatForInput(documento.data_vigencia_fim),
       dias_alerta: documento.dias_alerta || 30,
+      emails_cobranca: documento.emails_cobranca || '',
       status: documento.status || 'VIGENTE',
       observacao: documento.observacao || ''
     });
@@ -66,6 +68,7 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
       const payload = new FormData();
       Object.keys(formData).forEach(key => {
         if (key === 'anexos') return; // Do not send back the base64 string
+        if (key === 'emails_cobranca') { payload.append(key, formData[key] || ''); return; }
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
           if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) { const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, ''); payload.append(key, formData[key], safeName); } else { payload.append(key, formData[key]); }
         }
@@ -190,6 +193,11 @@ const ModalEditarDocumento = ({ documento, onClose, onSave }) => {
               )}
             </div>
           </div>
+
+          <SeletorEmailsCobranca
+            value={formData.emails_cobranca || ''}
+            onChange={(val) => setFormData(prev => ({ ...prev, emails_cobranca: val }))}
+          />
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', gap: '12px' }}>
             <button type="button" onClick={onClose} style={cancelBtnStyle}>Cancelar</button>

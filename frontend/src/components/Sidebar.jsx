@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileText, Users, Settings, LogOut, Grid, PlusCircle, Moon, Sun, Printer, Mail, BookOpen } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, Settings, LogOut, Grid, PlusCircle, Moon, Sun, Printer, Mail, BookOpen, GitBranch } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, userRole, onLogout, theme, setTheme }) => {
   const toggleTheme = () => {
@@ -107,6 +107,14 @@ const Sidebar = ({ activeTab, setActiveTab, userRole, onLogout, theme, setTheme 
             <span>Manual do Sistema</span>
           </div>
         )}
+
+        <div 
+          className={`nav-item ${activeTab === 'versionamento' ? 'active' : ''}`}
+          onClick={() => setActiveTab('versionamento')}
+        >
+          <GitBranch size={20} />
+          <span>Versionamento</span>
+        </div>
       </nav>
 
       <div style={{ padding: '24px', borderTop: '1px solid var(--panel-border)', marginTop: 'auto' }}>

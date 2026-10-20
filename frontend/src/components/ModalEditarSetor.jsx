@@ -4,7 +4,6 @@ import { X, Save } from 'lucide-react';
 
 const ModalEditarSetor = ({ setor, onClose, onSave }) => {
   const [nome, setNome] = useState(setor?.nome || '');
-  const [emailsCobranca, setEmailsCobranca] = useState(setor?.emails_cobranca || '');
   const [loading, setLoading] = useState(false);
 
   if (!setor) return null;
@@ -15,7 +14,7 @@ const ModalEditarSetor = ({ setor, onClose, onSave }) => {
     
     setLoading(true);
     try {
-      await axios.put(`/api/setores/${setor.id}`, { nome, emails_cobranca: emailsCobranca });
+      await axios.put(`/api/setores/${setor.id}`, { nome });
       onSave();
       onClose();
     } catch (err) {
@@ -44,20 +43,6 @@ const ModalEditarSetor = ({ setor, onClose, onSave }) => {
               style={inputStyle}
               required
             />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontWeight: 600 }}>E-mails extras p/ cobrança</label>
-            <textarea 
-              rows={3}
-              placeholder="Separados por vírgula..."
-              value={emailsCobranca}
-              onChange={(e) => setEmailsCobranca(e.target.value)}
-              style={{ ...inputStyle, resize: 'vertical' }}
-            />
-            <small style={{ color: 'var(--text-muted)' }}>
-              Esses e-mails receberão alertas automáticos e manuais de itens deste setor.
-            </small>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>

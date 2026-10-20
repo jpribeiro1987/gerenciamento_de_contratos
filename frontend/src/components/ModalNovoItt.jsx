@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, Save } from 'lucide-react';
+import SeletorEmailsCobranca from './SeletorEmailsCobranca';
 
 const ModalNovoItt = ({ onClose, onSave }) => {
   const [setores, setSetores] = useState([]);
@@ -10,6 +11,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
     data_emissao: '',
     data_vigencia_fim: '',
     dias_alerta: 30,
+    emails_cobranca: '',
     status: 'VIGENTE',
     observacao: '',
     pdf: null
@@ -39,10 +41,15 @@ const ModalNovoItt = ({ onClose, onSave }) => {
       const payload = new FormData();
       Object.keys(formData).forEach(key => {
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-          if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) { const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, ''); payload.append(key, formData[key], safeName); } else { payload.append(key, formData[key]); }
+          if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) {
+            const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, '');
+            payload.append(key, formData[key], safeName);
+          } else {
+            payload.append(key, formData[key]);
+          }
         }
       });
-      
+
       const res = await axios.post('/api/itts', payload);
       onSave(res.data);
       onClose();
@@ -59,9 +66,9 @@ const ModalNovoItt = ({ onClose, onSave }) => {
       <div className="glass-card" style={modalStyle}>
         <div className="flex-between" style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '1.4rem', margin: 0 }}>Nova ITT</h2>
-          <button onClick={onClose} style={closeBtnStyle}><X size={24}/></button>
+          <button onClick={onClose} style={closeBtnStyle}><X size={24} /></button>
         </div>
-        
+
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -106,6 +113,11 @@ const ModalNovoItt = ({ onClose, onSave }) => {
             </div>
           </div>
 
+          <SeletorEmailsCobranca
+            value={formData.emails_cobranca}
+            onChange={(val) => setFormData(prev => ({ ...prev, emails_cobranca: val }))}
+          />
+
           <div className="grid-2-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={labelStyle}>Observações</label>
@@ -120,7 +132,7 @@ const ModalNovoItt = ({ onClose, onSave }) => {
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', gap: '12px' }}>
             <button type="button" onClick={onClose} style={cancelBtnStyle}>Cancelar</button>
             <button type="submit" disabled={loading} style={saveBtnStyle}>
-              {loading ? 'Salvando...' : <><Save size={18}/> Salvar ITT</>}
+              {loading ? 'Salvando...' : <><Save size={18} /> Salvar ITT</>}
             </button>
           </div>
         </form>

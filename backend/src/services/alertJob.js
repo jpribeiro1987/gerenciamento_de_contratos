@@ -41,11 +41,7 @@ async function checkContractsAndAlert() {
         data_vigencia_fim: { not: null }
       },
       include: {
-        setor: {
-          include: {
-            usuarios: true
-          }
-        }
+        setor: true
       }
     });
 
@@ -84,14 +80,14 @@ async function checkContractsAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para o contrato ${contract.id} (${contract.empresa})`);
-          let emails = contract.setor.usuarios.map(u => u.email);
-          if (contract.setor.emails_cobranca) {
-            emails = emails.concat(contract.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          let emails = [];
+          if (contract.emails_cobranca) {
+            emails = contract.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
           }
           
           const uniqueEmails = [...new Set(emails)].join(',');
           if (!uniqueEmails) {
-            console.log(`[AlertJob] Nenhum e-mail configurado para o setor. Pulando envio.`);
+            console.log(`[AlertJob] Nenhum e-mail de cobrança configurado para o contrato ${contract.id}. Pulando envio.`);
             continue;
           }
           
@@ -161,11 +157,7 @@ async function checkIttsAndAlert() {
         data_vigencia_fim: { not: null }
       },
       include: {
-        setor: {
-          include: {
-            usuarios: true
-          }
-        }
+        setor: true
       }
     });
 
@@ -214,13 +206,13 @@ async function checkIttsAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para ITT ${itt.id} (${itt.titulo})`);
-          let emails = itt.setor.usuarios.map(u => u.email);
-          if (itt.setor.emails_cobranca) {
-            emails = emails.concat(itt.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          let emails = [];
+          if (itt.emails_cobranca) {
+            emails = itt.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
           }
           const uniqueEmails = [...new Set(emails)].join(',');
           if (!uniqueEmails) {
-            console.log(`[AlertJob] Nenhum e-mail configurado para o setor. Pulando envio.`);
+            console.log(`[AlertJob] Nenhum e-mail de cobrança configurado para a ITT ${itt.id}. Pulando envio.`);
             continue;
           }
           
@@ -290,9 +282,7 @@ async function checkDocumentosAndAlert() {
         data_vigencia_fim: { not: null }
       },
       include: {
-        setor: {
-          include: { usuarios: true }
-        }
+        setor: true
       }
     });
 
@@ -328,13 +318,13 @@ async function checkDocumentosAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para Documento ${doc.id} (${doc.titulo})`);
-          let emails = doc.setor.usuarios.map(u => u.email);
-          if (doc.setor.emails_cobranca) {
-            emails = emails.concat(doc.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
+          let emails = [];
+          if (doc.emails_cobranca) {
+            emails = doc.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
           }
           const uniqueEmails = [...new Set(emails)].join(',');
           if (!uniqueEmails) {
-            console.log(`[AlertJob] Nenhum e-mail configurado para o setor. Pulando envio.`);
+            console.log(`[AlertJob] Nenhum e-mail de cobrança configurado para o documento ${doc.id}. Pulando envio.`);
             continue;
           }
           
@@ -391,8 +381,74 @@ async function checkDocumentosAndAlert() {
   }
 }
 
+async function migrateInitialEmailsCobranca() {
+  try {
+    const alreadyMigrated = await prisma.configuracao.findUnique({
+      where: { chave: 'MIGRATED_EMAILS_COBRANCA_V1' }
+    });
+    if (alreadyMigrated?.valor === 'true') {
+      return;
+    }
+
+    console.log('[Migration] Executando migração inicial única de e-mails de cobrança para Contratos, ITTs e Documentos...');
+
+    const setores = await prisma.setor.findMany({
+      include: { usuarios: true }
+    });
+
+    for (const setor of setores) {
+      const nonSeedUsers = setor.usuarios.filter(u => u.email.toLowerCase() !== 'admin@hospital.com');
+      const targetUsers = nonSeedUsers.length > 0 ? nonSeedUsers : setor.usuarios;
+
+      let emails = targetUsers.map(u => u.email.trim()).filter(Boolean);
+      if (setor.emails_cobranca) {
+        const extra = setor.emails_cobranca.split(',').map(e => e.trim()).filter(Boolean);
+        emails = emails.concat(extra);
+      }
+
+      const uniqueEmails = [...new Set(emails)].join(', ');
+      if (!uniqueEmails) continue;
+
+      await prisma.contrato.updateMany({
+        where: {
+          setorId: setor.id,
+          OR: [{ emails_cobranca: null }, { emails_cobranca: '' }]
+        },
+        data: { emails_cobranca: uniqueEmails }
+      });
+
+      await prisma.itt.updateMany({
+        where: {
+          setorId: setor.id,
+          OR: [{ emails_cobranca: null }, { emails_cobranca: '' }]
+        },
+        data: { emails_cobranca: uniqueEmails }
+      });
+
+      await prisma.documento.updateMany({
+        where: {
+          setorId: setor.id,
+          OR: [{ emails_cobranca: null }, { emails_cobranca: '' }]
+        },
+        data: { emails_cobranca: uniqueEmails }
+      });
+    }
+
+    await prisma.configuracao.upsert({
+      where: { chave: 'MIGRATED_EMAILS_COBRANCA_V1' },
+      update: { valor: 'true' },
+      create: { chave: 'MIGRATED_EMAILS_COBRANCA_V1', valor: 'true' }
+    });
+
+    console.log('[Migration] Migração inicial de e-mails de cobrança concluída com sucesso!');
+  } catch (err) {
+    console.error('[Migration] Erro ao migrar e-mails de cobrança iniciais:', err);
+  }
+}
+
 async function initJobs() {
   try {
+    await migrateInitialEmailsCobranca();
     const config = await prisma.configuracao.findUnique({ where: { chave: 'ALERT_CRON_TIME' } });
     const timeString = config?.valor || '06:00';
     await scheduleAlertJob(timeString);

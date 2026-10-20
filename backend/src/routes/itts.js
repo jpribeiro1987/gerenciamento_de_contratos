@@ -28,6 +28,7 @@ router.get('/', async (req, res) => {
         data_emissao: true,
         data_vigencia_fim: true,
         dias_alerta: true,
+        emails_cobranca: true,
         status: true,
         observacao: true,
         criado_por: true,
@@ -116,6 +117,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         data_emissao: data.data_emissao ? new Date(data.data_emissao) : null,
         data_vigencia_fim: data.data_vigencia_fim ? new Date(data.data_vigencia_fim) : null,
         dias_alerta: data.dias_alerta ? parseInt(data.dias_alerta) : 30,
+        emails_cobranca: data.emails_cobranca || null,
         status: data.status || 'VIGENTE',
         observacao: data.observacao,
         anexos: anexos
@@ -141,6 +143,7 @@ router.put('/:id', upload.single('pdf'), async (req, res) => {
     if (data.data_emissao !== undefined) updateData.data_emissao = data.data_emissao ? new Date(data.data_emissao) : null;
     if (data.data_vigencia_fim !== undefined) updateData.data_vigencia_fim = data.data_vigencia_fim ? new Date(data.data_vigencia_fim) : null;
     if (data.dias_alerta !== undefined) updateData.dias_alerta = data.dias_alerta ? parseInt(data.dias_alerta) : 30;
+    if (data.emails_cobranca !== undefined) updateData.emails_cobranca = data.emails_cobranca;
     if (data.observacao !== undefined) updateData.observacao = data.observacao;
     if (data.status !== undefined) updateData.status = data.status;
 
@@ -219,13 +222,13 @@ router.post('/:id/alert-manual', async (req, res) => {
 
     if (!itt) return res.status(404).json({ error: 'ITT não encontrada' });
 
-    let emails = itt.setor.usuarios.map(u => u.email);
-          if (itt.setor.emails_cobranca) {
-            emails = emails.concat(itt.setor.emails_cobranca.split(',').map(e => e.trim()).filter(e => e));
-          }
+    let emails = [];
+    if (itt.emails_cobranca) {
+      emails = itt.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
+    }
     const uniqueEmails = [...new Set(emails)].join(',');
     if (!uniqueEmails) {
-      return res.status(400).json({ error: 'Nenhum e-mail configurado para este setor.' });
+      return res.status(400).json({ error: 'Nenhum e-mail de cobrança configurado para esta ITT.' });
     }
 
     const configSubject = await prisma.configuracao.findUnique({ where: { chave: 'EMAIL_TEMPLATE_SUBJECT_ITT' } });

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, Save, FileText, Plus, Trash2, Edit } from 'lucide-react';
+import SeletorEmailsCobranca from './SeletorEmailsCobranca';
 
 const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
   const [setores, setSetores] = useState([]);
@@ -38,6 +39,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
       valor: contrato.valor || '',
       prazo_rescisao_dias: contrato.prazo_rescisao_dias || 30,
       dias_alerta: contrato.dias_alerta || 30,
+      emails_cobranca: contrato.emails_cobranca || '',
       renovacao_automatica: !!contrato.renovacao_automatica,
       observacao: contrato.observacao || ''
     });
@@ -89,6 +91,7 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
       const payload = new FormData();
       Object.keys(formData).forEach(key => {
         if (key === 'anexos') return; // Do not send back the base64 string
+        if (key === 'emails_cobranca') { payload.append(key, formData[key] || ''); return; }
         if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
           if ((key === 'pdf' || key === 'novo_pdf') && formData[key] instanceof File) { const safeName = formData[key].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.\-_ ]/g, ''); payload.append(key, formData[key], safeName); } else { payload.append(key, formData[key]); }
         }
@@ -180,6 +183,11 @@ const ModalEditarContrato = ({ contrato, onClose, onSave }) => {
               <textarea name="observacao" rows={3} value={formData.observacao} onChange={handleChange} style={{ ...inputStyle, resize: 'vertical' }} />
             </div>
           </div>
+
+          <SeletorEmailsCobranca
+            value={formData.emails_cobranca || ''}
+            onChange={(val) => setFormData(prev => ({ ...prev, emails_cobranca: val }))}
+          />
 
           <div className="grid-1-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

@@ -15,9 +15,9 @@ model Setor {
   nome             String      @unique
   emails_cobranca  String?
   contratos        Contrato[]
-  itts       Itt[]
-  documentos Documento[]
-  usuarios   Usuario[]   @relation("UsuarioSetor")
+  itts             Itt[]
+  documentos       Documento[]
+  usuarios         Usuario[]   @relation("UsuarioSetor")
 }
 
 model Usuario {
@@ -43,6 +43,7 @@ model Contrato {
   data_vigencia_fim    DateTime?
   renovacao_automatica Boolean           @default(false)
   dias_alerta          Int               @default(30)
+  emails_cobranca      String?
   status               String            @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, RENOVADO, ENCERRADO
   observacao           String?
   anexos               String?           
@@ -66,13 +67,13 @@ model Aditivo {
 }
 
 model HistoricoAlerta {
-  id           Int      @id @default(autoincrement())
-  contratoId   Int
-  contrato     Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
-  data_envio   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  contratoId    Int
+  contrato      Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  data_envio    DateTime @default(now())
   destinatarios String
-  status_envio String
-  erro         String?
+  status_envio  String
+  erro          String?
 }
 
 model Configuracao {
@@ -82,19 +83,20 @@ model Configuracao {
 }
 
 model Itt {
-  id                   Int               @id @default(autoincrement())
+  id                   Int                  @id @default(autoincrement())
   titulo               String
   setorId              Int
-  setor                Setor             @relation(fields: [setorId], references: [id])
+  setor                Setor                @relation(fields: [setorId], references: [id])
   data_emissao         DateTime?
   data_vigencia_fim    DateTime?
-  dias_alerta          Int               @default(30)
-  status               String            @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, REVISADO, CANCELADO
+  dias_alerta          Int                  @default(30)
+  emails_cobranca      String?
+  status               String               @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, REVISADO, CANCELADO
   observacao           String?
   anexos               String?           
   criado_por           String?
-  atualizado_em        DateTime          @updatedAt
-  criado_em            DateTime          @default(now())
+  atualizado_em        DateTime             @updatedAt
+  criado_em            DateTime             @default(now())
   HistoricoAlertaItt   HistoricoAlertaItt[]
   revisoes             RevisaoItt[]
 }
@@ -110,51 +112,52 @@ model RevisaoItt {
 }
 
 model HistoricoAlertaItt {
-  id           Int      @id @default(autoincrement())
-  ittId        Int
-  itt          Itt      @relation(fields: [ittId], references: [id], onDelete: Cascade)
-  data_envio   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  ittId         Int
+  itt           Itt      @relation(fields: [ittId], references: [id], onDelete: Cascade)
+  data_envio    DateTime @default(now())
   destinatarios String
-  status_envio String
-  erro         String?
+  status_envio  String
+  erro          String?
 }
 
 model Documento {
-  id                   Int               @id @default(autoincrement())
-  tipo                 String            @default("CND") // CND, CERTIFICADO, ALVARA, OUTROS
+  id                   Int                        @id @default(autoincrement())
+  tipo                 String                     @default("CND") // CND, CERTIFICADO, ALVARA, OUTROS
   orgao_emissor        String?           
   titulo               String
   setorId              Int
-  setor                Setor             @relation(fields: [setorId], references: [id])
+  setor                Setor                      @relation(fields: [setorId], references: [id])
   data_emissao         DateTime?
   data_vigencia_fim    DateTime?
-  dias_alerta          Int               @default(30)
-  status               String            @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, RENOVADO, CANCELADO
+  dias_alerta          Int                        @default(30)
+  emails_cobranca      String?
+  status               String                     @default("VIGENTE") // VIGENTE, A_VENCER, VENCIDO, RENOVADO, CANCELADO
   observacao           String?
   anexos               String?           
   criado_por           String?
-  atualizado_em        DateTime          @updatedAt
-  criado_em            DateTime          @default(now())
+  atualizado_em        DateTime                   @updatedAt
+  criado_em            DateTime                   @default(now())
   HistoricoAlertaDoc   HistoricoAlertaDocumento[]
   renovacoes           RenovacaoDocumento[]
 }
 
 model RenovacaoDocumento {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   documentoId        Int
   documento          Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
   descricao          String?
   nova_data_vigencia DateTime
   anexos             String?
-  criado_em          DateTime @default(now())
+  criado_em          DateTime  @default(now())
 }
 
 model HistoricoAlertaDocumento {
-  id           Int      @id @default(autoincrement())
-  documentoId  Int
-  documento    Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
-  data_envio   DateTime @default(now())
+  id            Int       @id @default(autoincrement())
+  documentoId   Int
+  documento     Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+  data_envio    DateTime  @default(now())
   destinatarios String
-  status_envio String
-  erro         String?
+  status_envio  String
+  erro          String?
 }

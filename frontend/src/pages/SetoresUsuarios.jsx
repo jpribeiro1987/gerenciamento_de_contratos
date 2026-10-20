@@ -9,7 +9,7 @@ const SetoresUsuarios = () => {
   // States para Setores
   const [setores, setSetores] = useState([]);
   const [editingSetor, setEditingSetor] = useState(null);
-  const [setorFormData, setSetorFormData] = useState({ nome: '', emails_cobranca: '' });
+  const [setorFormData, setSetorFormData] = useState({ nome: '' });
   
   // States para Usuários
   const [usuarios, setUsuarios] = useState([]);
@@ -44,7 +44,7 @@ const SetoresUsuarios = () => {
     if (!setorFormData.nome) return;
     try {
       await axios.post('/api/setores', setorFormData);
-      setSetorFormData({ nome: '', emails_cobranca: '' });
+      setSetorFormData({ nome: '' });
       fetchSetores();
     } catch (err) { alert('Erro ao criar setor'); }
   };
@@ -120,7 +120,7 @@ const SetoresUsuarios = () => {
       <header>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 600 }}>Setores & Usuários</h1>
         <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>
-          Gerencie a estrutura da organização e os acessos.
+          Gerencie a estrutura da organização e os acessos (os destinatários de e-mail de cobrança são definidos diretamente em cada Contrato, ITT ou CND).
         </p>
       </header>
 
@@ -159,7 +159,6 @@ const SetoresUsuarios = () => {
             <thead>
               <tr style={{ borderBottom: '1px solid var(--panel-border)', textAlign: 'left' }}>
                 <th style={{ padding: '12px' }}>Setor</th>
-                <th style={{ padding: '12px' }}>E-mails de Cobrança</th>
                 <th style={{ padding: '12px', textAlign: 'right' }}>Ações</th>
               </tr>
             </thead>
@@ -167,7 +166,6 @@ const SetoresUsuarios = () => {
               {setores.map(s => (
                 <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   <td style={{ padding: '12px' }}>{s.nome}</td>
-                  <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{s.emails_cobranca || '-'}</td>
                   <td style={{ padding: '12px', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                     <button onClick={() => handleEditSetor(s)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}>
                       <Edit size={18} />
@@ -226,7 +224,7 @@ const SetoresUsuarios = () => {
 
               {userFormData.perfil === 'GESTOR' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-                  <label>Setores Vinculados (Permissão de visualização)</label>
+                  <label>Setores Vinculados (Apenas permissão de visualização no sistema)</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
                     {setores.map(s => (
                       <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
@@ -254,7 +252,7 @@ const SetoresUsuarios = () => {
                 <th style={{ padding: '12px' }}>Nome</th>
                 <th style={{ padding: '12px' }}>E-mail</th>
                 <th style={{ padding: '12px' }}>Perfil</th>
-                <th style={{ padding: '12px' }}>Setores</th>
+                <th style={{ padding: '12px' }}>Setores (Acesso)</th>
                 <th style={{ padding: '12px', textAlign: 'right' }}>Ações</th>
               </tr>
             </thead>
