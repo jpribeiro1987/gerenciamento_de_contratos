@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { sendEmail } = require('../services/emailService');
+const { ensureInitialEmailsSnapshot, resolveEmailsCobranca } = require('../services/cobrancaHelper');
 
 const router = express.Router();
 const prisma = require('../prisma');
@@ -16,6 +17,7 @@ router.get('/', async (req, res) => {
   const { setorId } = req.query;
   
   try {
+    const sectorMap = await ensureInitialEmailsSnapshot();
     const whereClause = setorId ? { setorId: parseInt(setorId) } : {};
     
     const itts = await prisma.itt.findMany({
@@ -59,6 +61,7 @@ router.get('/', async (req, res) => {
     for (const row of revisoesAnexos) mapRevisoes[row.id] = row.mime;
 
     itts.forEach(i => {
+      i.emails_cobranca = resolveEmailsCobranca(i, sectorMap);
       if (mapItts[i.id]) i.anexos = mapItts[i.id];
       if (i.revisoes && i.revisoes.length > 0) {
         i.revisoes.forEach(r => {
@@ -116,7 +119,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         data_emissao: data.data_emissao ? new Date(data.data_emissao) : null,
         data_vigencia_fim: data.data_vigencia_fim ? new Date(data.data_vigencia_fim) : null,
         dias_alerta: data.dias_alerta ? parseInt(data.dias_alerta) : 30,
-        emails_cobranca: data.emails_cobranca || null,
+        emails_cobranca: data.emails_cobranca || '',
         status: data.status || 'VIGENTE',
         observacao: data.observacao,
         anexos: anexos
@@ -221,10 +224,9 @@ router.post('/:id/alert-manual', async (req, res) => {
 
     if (!itt) return res.status(404).json({ error: 'ITT não encontrada' });
 
-    let emails = [];
-    if (itt.emails_cobranca) {
-      emails = itt.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
-    }
+    const sectorMap = await ensureInitialEmailsSnapshot();
+    const effectiveEmails = resolveEmailsCobranca(itt, sectorMap);
+    let emails = effectiveEmails ? effectiveEmails.split(',').map(e => e.trim()).filter(e => e) : [];
     const uniqueEmails = [...new Set(emails)].join(',');
     if (!uniqueEmails) {
       return res.status(400).json({ error: 'Nenhum e-mail de cobrança configurado para esta ITT.' });

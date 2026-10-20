@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { sendEmail } = require('../services/emailService');
+const { ensureInitialEmailsSnapshot, resolveEmailsCobranca } = require('../services/cobrancaHelper');
 
 const router = express.Router();
 const prisma = require('../prisma');
@@ -15,6 +16,7 @@ router.get('/', async (req, res) => {
   const { setorId } = req.query;
   
   try {
+    const sectorMap = await ensureInitialEmailsSnapshot();
     const whereClause = setorId ? { setorId: parseInt(setorId) } : {};
     
     const documentos = await prisma.documento.findMany({
@@ -60,6 +62,7 @@ router.get('/', async (req, res) => {
     for (const row of renovacoesAnexos) mapRenovacoes[row.id] = row.mime;
 
     documentos.forEach(d => {
+      d.emails_cobranca = resolveEmailsCobranca(d, sectorMap);
       if (mapDocumentos[d.id]) d.anexos = mapDocumentos[d.id];
       if (d.renovacoes && d.renovacoes.length > 0) {
         d.renovacoes.forEach(r => {
@@ -118,7 +121,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         data_emissao: data.data_emissao ? new Date(data.data_emissao) : null,
         data_vigencia_fim: data.data_vigencia_fim ? new Date(data.data_vigencia_fim) : null,
         dias_alerta: data.dias_alerta ? parseInt(data.dias_alerta) : 30,
-        emails_cobranca: data.emails_cobranca || null,
+        emails_cobranca: data.emails_cobranca || '',
         status: data.status || 'VIGENTE',
         observacao: data.observacao,
         anexos: anexos
@@ -225,10 +228,9 @@ router.post('/:id/alert-manual', async (req, res) => {
 
     if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
 
-    let emails = [];
-    if (doc.emails_cobranca) {
-      emails = doc.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
-    }
+    const sectorMap = await ensureInitialEmailsSnapshot();
+    const effectiveEmails = resolveEmailsCobranca(doc, sectorMap);
+    let emails = effectiveEmails ? effectiveEmails.split(',').map(e => e.trim()).filter(e => e) : [];
     const uniqueEmails = [...new Set(emails)].join(',');
     if (!uniqueEmails) {
       return res.status(400).json({ error: 'Nenhum e-mail de cobrança configurado para este documento.' });

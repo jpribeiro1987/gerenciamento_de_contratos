@@ -107,7 +107,7 @@ const NovoContrato = () => {
           </div>
         </div>
 
-        <div className="grid-4-col">
+        <div className="grid-2-col">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label>Valor (R$)</label>
             <input type="number" step="0.01" name="valor" value={formData.valor} onChange={handleChange} style={inputStyle} />
@@ -119,7 +119,9 @@ const NovoContrato = () => {
               {unidadesMedida.map((u, i) => <option key={i} value={u}>{u}</option>)}
             </select>
           </div>
+        </div>
 
+        <div className="grid-2-col">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label>Data de Contratação</label>
             <input type="date" name="data_contratacao" value={formData.data_contratacao} onChange={handleChange} style={inputStyle} />

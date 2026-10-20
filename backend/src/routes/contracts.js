@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { sendEmail } = require('../services/emailService');
+const { ensureInitialEmailsSnapshot, resolveEmailsCobranca } = require('../services/cobrancaHelper');
 
 const router = express.Router();
 const prisma = require('../prisma');
@@ -16,6 +17,7 @@ router.get('/', async (req, res) => {
   const { setorId } = req.query;
   
   try {
+    const sectorMap = await ensureInitialEmailsSnapshot();
     const whereClause = setorId ? { setorId: parseInt(setorId) } : {};
     
     const contracts = await prisma.contrato.findMany({
@@ -67,6 +69,7 @@ router.get('/', async (req, res) => {
     for (const row of aditivosAnexos) mapAditivos[row.id] = row.mime;
 
     contracts.forEach(c => {
+      c.emails_cobranca = resolveEmailsCobranca(c, sectorMap);
       if (mapContratos[c.id]) c.anexos = mapContratos[c.id];
       if (c.aditivos && c.aditivos.length > 0) {
         c.aditivos.forEach(ad => {
@@ -127,7 +130,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         data_vigencia_fim: data.data_vigencia_fim ? new Date(data.data_vigencia_fim) : null,
         renovacao_automatica: data.renovacao_automatica === 'true',
         dias_alerta: data.dias_alerta ? parseInt(data.dias_alerta) : 30,
-        emails_cobranca: data.emails_cobranca || null,
+        emails_cobranca: data.emails_cobranca || '',
         prazo_rescisao_dias: data.prazo_rescisao_dias ? parseInt(data.prazo_rescisao_dias) : null,
         status: data.status || 'VIGENTE',
         observacao: data.observacao,
@@ -237,10 +240,9 @@ router.post('/:id/alert-manual', async (req, res) => {
 
     if (!contract) return res.status(404).json({ error: 'Contrato não encontrado' });
 
-    let emails = [];
-    if (contract.emails_cobranca) {
-      emails = contract.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
-    }
+    const sectorMap = await ensureInitialEmailsSnapshot();
+    const effectiveEmails = resolveEmailsCobranca(contract, sectorMap);
+    let emails = effectiveEmails ? effectiveEmails.split(',').map(e => e.trim()).filter(e => e) : [];
     const uniqueEmails = [...new Set(emails)].join(',');
     if (!uniqueEmails) {
       return res.status(400).json({ error: 'Nenhum e-mail de cobrança configurado para este contrato.' });

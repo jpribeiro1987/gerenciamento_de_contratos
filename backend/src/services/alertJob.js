@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const prisma = require('../prisma');
 const { sendEmail } = require('./emailService');
+const { ensureInitialEmailsSnapshot, resolveEmailsCobranca } = require('./cobrancaHelper');
 
 let currentCronTask = null;
 
@@ -26,6 +27,7 @@ async function scheduleAlertJob(timeString = "06:00") {
 
 async function checkContractsAndAlert() {
   try {
+    const sectorMap = await ensureInitialEmailsSnapshot();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -37,6 +39,7 @@ async function checkContractsAndAlert() {
       select: {
         id: true,
         empresa: true,
+        setorId: true,
         status: true,
         data_vigencia_fim: true,
         dias_alerta: true,
@@ -76,10 +79,8 @@ async function checkContractsAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para o contrato ${contract.id} (${contract.empresa})`);
-          let emails = [];
-          if (contract.emails_cobranca) {
-            emails = contract.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
-          }
+          const effectiveEmails = resolveEmailsCobranca(contract, sectorMap);
+          const emails = effectiveEmails ? effectiveEmails.split(',').map(e => e.trim()).filter(e => e) : [];
           
           const uniqueEmails = [...new Set(emails)].join(',');
           if (!uniqueEmails) {
@@ -142,6 +143,7 @@ async function checkContractsAndAlert() {
 
 async function checkIttsAndAlert() {
   try {
+    const sectorMap = await ensureInitialEmailsSnapshot();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -153,6 +155,7 @@ async function checkIttsAndAlert() {
       select: {
         id: true,
         titulo: true,
+        setorId: true,
         status: true,
         data_vigencia_fim: true,
         dias_alerta: true,
@@ -205,10 +208,8 @@ async function checkIttsAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para ITT ${itt.id} (${itt.titulo})`);
-          let emails = [];
-          if (itt.emails_cobranca) {
-            emails = itt.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
-          }
+          const effectiveEmails = resolveEmailsCobranca(itt, sectorMap);
+          const emails = effectiveEmails ? effectiveEmails.split(',').map(e => e.trim()).filter(e => e) : [];
           const uniqueEmails = [...new Set(emails)].join(',');
           if (!uniqueEmails) {
             console.log(`[AlertJob] Nenhum e-mail de cobrança configurado para a ITT ${itt.id}. Pulando envio.`);
@@ -272,6 +273,7 @@ async function checkIttsAndAlert() {
 
 async function checkDocumentosAndAlert() {
   try {
+    const sectorMap = await ensureInitialEmailsSnapshot();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -283,6 +285,7 @@ async function checkDocumentosAndAlert() {
       select: {
         id: true,
         titulo: true,
+        setorId: true,
         status: true,
         data_vigencia_fim: true,
         dias_alerta: true,
@@ -322,10 +325,8 @@ async function checkDocumentosAndAlert() {
 
         if (shouldSend) {
           console.log(`[AlertJob] Enviando alerta para Documento ${doc.id} (${doc.titulo})`);
-          let emails = [];
-          if (doc.emails_cobranca) {
-            emails = doc.emails_cobranca.split(',').map(e => e.trim()).filter(e => e);
-          }
+          const effectiveEmails = resolveEmailsCobranca(doc, sectorMap);
+          const emails = effectiveEmails ? effectiveEmails.split(',').map(e => e.trim()).filter(e => e) : [];
           const uniqueEmails = [...new Set(emails)].join(',');
           if (!uniqueEmails) {
             console.log(`[AlertJob] Nenhum e-mail de cobrança configurado para o documento ${doc.id}. Pulando envio.`);
@@ -385,108 +386,9 @@ async function checkDocumentosAndAlert() {
   }
 }
 
-async function migrateInitialEmailsCobranca() {
-  try {
-    const alreadyMigrated = await prisma.configuracao.findUnique({
-      where: { chave: 'MIGRATED_EMAILS_COBRANCA_V1' }
-    });
-    if (alreadyMigrated?.valor === 'true') {
-      return;
-    }
-
-    console.log('[Migration] Executando migração inicial única de e-mails de cobrança...');
-
-    const setores = await prisma.setor.findMany({
-      include: { usuarios: true }
-    });
-
-    const setorEmailMap = {};
-    for (const setor of setores) {
-      const nonSeedUsers = setor.usuarios.filter(u => u.email.toLowerCase() !== 'admin@hospital.com');
-      const targetUsers = nonSeedUsers.length > 0 ? nonSeedUsers : setor.usuarios;
-
-      let emails = targetUsers.map(u => u.email.trim()).filter(Boolean);
-      if (setor.emails_cobranca) {
-        const extra = setor.emails_cobranca.split(',').map(e => e.trim()).filter(Boolean);
-        emails = emails.concat(extra);
-      }
-
-      const uniqueEmails = [...new Set(emails)].join(', ');
-      if (uniqueEmails) {
-        setorEmailMap[setor.id] = uniqueEmails;
-      }
-    }
-
-    // Atualizar buscando apenas id e setorId (sem ler a coluna anexos pesada) e atualizando pela chave primária id
-    const contratosPendentes = await prisma.contrato.findMany({
-      where: { OR: [{ emails_cobranca: null }, { emails_cobranca: '' }] },
-      select: { id: true, setorId: true }
-    });
-    const contratosPorSetor = {};
-    for (const c of contratosPendentes) {
-      if (setorEmailMap[c.setorId]) {
-        if (!contratosPorSetor[c.setorId]) contratosPorSetor[c.setorId] = [];
-        contratosPorSetor[c.setorId].push(c.id);
-      }
-    }
-    for (const [setorId, ids] of Object.entries(contratosPorSetor)) {
-      await prisma.contrato.updateMany({
-        where: { id: { in: ids } },
-        data: { emails_cobranca: setorEmailMap[setorId] }
-      });
-    }
-
-    const ittsPendentes = await prisma.itt.findMany({
-      where: { OR: [{ emails_cobranca: null }, { emails_cobranca: '' }] },
-      select: { id: true, setorId: true }
-    });
-    const ittsPorSetor = {};
-    for (const i of ittsPendentes) {
-      if (setorEmailMap[i.setorId]) {
-        if (!ittsPorSetor[i.setorId]) ittsPorSetor[i.setorId] = [];
-        ittsPorSetor[i.setorId].push(i.id);
-      }
-    }
-    for (const [setorId, ids] of Object.entries(ittsPorSetor)) {
-      await prisma.itt.updateMany({
-        where: { id: { in: ids } },
-        data: { emails_cobranca: setorEmailMap[setorId] }
-      });
-    }
-
-    const docsPendentes = await prisma.documento.findMany({
-      where: { OR: [{ emails_cobranca: null }, { emails_cobranca: '' }] },
-      select: { id: true, setorId: true }
-    });
-    const docsPorSetor = {};
-    for (const d of docsPendentes) {
-      if (setorEmailMap[d.setorId]) {
-        if (!docsPorSetor[d.setorId]) docsPorSetor[d.setorId] = [];
-        docsPorSetor[d.setorId].push(d.id);
-      }
-    }
-    for (const [setorId, ids] of Object.entries(docsPorSetor)) {
-      await prisma.documento.updateMany({
-        where: { id: { in: ids } },
-        data: { emails_cobranca: setorEmailMap[setorId] }
-      });
-    }
-
-    await prisma.configuracao.upsert({
-      where: { chave: 'MIGRATED_EMAILS_COBRANCA_V1' },
-      update: { valor: 'true' },
-      create: { chave: 'MIGRATED_EMAILS_COBRANCA_V1', valor: 'true' }
-    });
-
-    console.log('[Migration] Migração inicial de e-mails de cobrança concluída com sucesso!');
-  } catch (err) {
-    console.error('[Migration] Erro ao migrar e-mails de cobrança iniciais:', err);
-  }
-}
-
 async function initJobs() {
   try {
-    await migrateInitialEmailsCobranca();
+    await ensureInitialEmailsSnapshot();
     const config = await prisma.configuracao.findUnique({ where: { chave: 'ALERT_CRON_TIME' } });
     const timeString = config?.valor || '06:00';
     await scheduleAlertJob(timeString);

@@ -268,10 +268,18 @@ h1, h2, h3 { margin: 0; }
 }
 
 /* RESPONSIVE LAYOUT */
-.grid-1-col { display: grid; grid-template-columns: 1fr; gap: 16px; }
-.grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-3-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.grid-4-col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+.grid-1-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.grid-2-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid-3-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid-4-col { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.grid-1-col > *, .grid-2-col > *, .grid-3-col > *, .grid-4-col > * { min-width: 0; }
+.grid-1-col input:not([type="checkbox"]), .grid-2-col input:not([type="checkbox"]), .grid-3-col input:not([type="checkbox"]), .grid-4-col input:not([type="checkbox"]),
+.grid-1-col select, .grid-2-col select, .grid-3-col select, .grid-4-col select,
+.grid-1-col textarea, .grid-2-col textarea, .grid-3-col textarea, .grid-4-col textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
 
 @media screen and (max-width: 768px) {
   .app-container {
